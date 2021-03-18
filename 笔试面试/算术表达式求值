@@ -1,0 +1,106 @@
+/*
+奇安信面试，让我一个小时之后写出来发到面试官邮箱，写出来才发现他没告诉我邮箱是什么，，，
+失联了。
+*/
+
+
+#include<stdio.h>
+
+#define STACKSIZE 10000
+
+#define L   -5               //如，-5被看作是一个符号加一个数字，所以没有负数出现，因此可以把符号定义为负数和数字一起存在同一个数组中。
+#define ADD -4
+#define SUB -3
+#define MUL -2
+#define DIV -1        
+
+static void
+pop(int * stack,int *stack_i,int * new_expr,int *k,int symbol){
+    while(*stack_i >=0 && symbol<=stack[*stack_i]){
+                new_expr[(*k)++]=stack[(*stack_i)--];
+            }
+            stack[++*stack_i]=symbol;
+}
+
+static inline int
+getValue(int * stack,int stack_i){
+    return stack_i>=0?stack[stack_i]:0;
+}
+
+int
+calculate(char * expr){
+    int i,stack[STACKSIZE],stack_i=-1,num=0,new_expr[STACKSIZE],k=0;
+
+    for(i=0;expr[i];){
+        if(expr[i]<='9' && expr[i]>='0'){
+            while(expr[i]<='9' && expr[i]>='0'){
+                num=num*10+expr[i++]-48;
+            }
+            new_expr[k++]=num,num=0;
+        }
+        switch(expr[i]){
+            case '+':
+                pop(stack,&stack_i,new_expr,&k,ADD);
+                break;
+            case '-':
+                pop(stack,&stack_i,new_expr,&k,SUB);
+                break;
+            case '*':
+                pop(stack,&stack_i,new_expr,&k,MUL);
+                break;
+            case '/':
+                pop(stack,&stack_i,new_expr,&k,DIV);
+                break;
+            case '(':
+                stack[++stack_i]=L;
+                break;
+            case ')':
+                while(stack_i>=0 && stack[stack_i]!=L){
+                    new_expr[k++]=stack[stack_i--];
+                }
+                stack_i--;
+                break;
+        }
+        i++;
+    }      
+    if(num)
+        new_expr[k++]=num;
+    while(stack_i>=0){
+        new_expr[k++]=stack[stack_i--];
+    } 
+
+    for(stack_i=-1,i=0;i<k;i++){
+        if(new_expr[i]>=0){
+            stack[++stack_i]=new_expr[i];
+        }else{
+            switch(new_expr[i]){
+                case ADD:
+                    num=getValue(stack,stack_i-1)+getValue(stack,stack_i);
+                    stack_i--;
+                    stack_i=stack_i>0 ?stack_i:0;
+                    stack[stack_i]=num;
+                    break;
+                case SUB:
+                    num=getValue(stack,stack_i-1)-getValue(stack,stack_i);
+                    stack_i--;
+                    stack_i=stack_i>0 ?stack_i:0;
+                    stack[stack_i]=num;
+                    break;
+                case MUL:
+                    num=getValue(stack,stack_i-1)*getValue(stack,stack_i);
+                    stack_i--;
+                    stack_i=stack_i>0 ?stack_i:0;
+                    stack[stack_i]=num;
+                    break;
+                case DIV:
+                    num=getValue(stack,stack_i-1)/getValue(stack,stack_i);
+                    stack_i--;
+                    stack_i=stack_i>0 ?stack_i:0;
+                    stack[stack_i]=num;
+                    break;
+            }
+        }
+    }
+
+    return stack[0];
+}
