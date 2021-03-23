@@ -16,8 +16,9 @@
 
 static void
 pop(int * stack,int *stack_i,int * new_expr,int *k,int symbol){
-    symbol-=(-symbo)%2;                                          //比如说，SUB应该也要把ADD弹出来
-    while(*stack_i >=0 && symbol<=stack[*stack_i]){
+    int symbol_=symbol-(-symbol)%2;                                      //比如说，SUB应该也要把ADD弹出来
+   
+    while(*stack_i >=0 && symbol_<=stack[*stack_i]){
                 new_expr[(*k)++]=stack[(*stack_i)--];
             }
             stack[++*stack_i]=symbol;
