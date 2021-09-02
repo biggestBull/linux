@@ -7,7 +7,7 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<unistd.h>
-#include"../../data_structure/Heap/Heap.h"
+#include"../../Datastructure/Heap/Heap.h"
 
 #define HFM_BUFFER_SIZE 1024 
 
