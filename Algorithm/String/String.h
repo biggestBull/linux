@@ -1,10 +1,10 @@
-#ifndef ALG_STRING_H
-#define ALG_STRING_H
+#ifndef ALG_STRING_HEAD
+#define ALG_STRING_HEAD
 
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"../../data_structure/Queue/queue.h"
+#include"../../Datastructure/Queue/queue.h"
 
 
 struct Son_Node{
