@@ -1,10 +1,10 @@
-#ifndef ALGORITHM
-#define ALGORITHM
+#ifndef ALG_STRING_H
+#define ALG_STRING_H
 
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"../data_structure/Queue/queue.h"
+#include"../../data_structure/Queue/queue.h"
 
 
 struct Son_Node{
@@ -37,6 +37,7 @@ create_ACAM(char ** keyset);
 int
 isKeyExist(struct AC_am_Node * Root,char * string);
 struct Queue *
+
 numberOfKeys(struct AC_am_Node * Root,char * string,struct Queue *queue);
 
 #endif
