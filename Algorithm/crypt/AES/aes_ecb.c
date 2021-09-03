@@ -1,6 +1,3 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
 /*
 sbox:
                                          0x63
@@ -283,17 +280,13 @@ _string_to_array(unsigned char * s,unsigned char (*plain_array)[4]){
 
 static void
 _add_round_key(unsigned char (*plain_array)[4],unsigned char (*ext_key)[44],int start_col){
-    int i,j;
+    int i,j,k;
 
-    printf("add:%d %p %d\n",ext_key[0][36],ext_key,start_col);
-    for(j=start_col,start_col+=4;j<start_col;j++){
+    for(k=0,j=start_col,start_col+=4;j<start_col;j++,k++){
         for(i=0;i<4;i++){
-            plain_array[i][j]^=ext_key[i][j];
-            // printf("%d ",ext_key[i][j]);
+            plain_array[i][k]^=ext_key[i][j];
         }
-        // printf("\n");
     }
-    // printf("\n");
 }
 
 static void
@@ -335,7 +328,7 @@ _mix_colum(unsigned char (*plain_array)[4],const unsigned char (*mix_array)[4]){
     }
 }
 
-int
+void
 print_box(unsigned char box[256],int flag){
     int i=0;
     
@@ -346,7 +339,6 @@ print_box(unsigned char box[256],int flag){
         printf("0x%02x%c",box[i],i<255?',':' ');
     }
     printf("\n};");
-    return 1;
 }
 
 void 
@@ -357,11 +349,8 @@ aes_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int
         0x01, 0x01, 0x02, 0x03,
         0x03, 0x01, 0x01, 0x02
     };
-    unsigned char s_box[256],ext_key[4][44],(*plain_array)[4]=malloc(4*4);
-    //狗屎，plain_array非得用malloc或者一维数组才正常！用二维数组莫名其妙的值传过去不对，不知道是不是系统的bug(还有个说法是栈内存是不保证连续的)
-    //而且还不能free，怀疑整个程序有内存越界的问题，改天再好好检查一下(很有可能是操作box时越界了，因为我把box替换为常量时就报abort错误)
+    unsigned char s_box[256],ext_key[4][44],plain_array[4][4];
     int i,j,k;
-    printf("plain_array:%p\n:",plain_array);
     _gen_s_box(s_box);
     _gen_ext_key(key,ext_key,s_box);
     for(k=0;k<count;k++){
@@ -373,7 +362,6 @@ aes_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int
             _shift_rows(plain_array);
             if(i!=10)
                 _mix_colum(plain_array,MixArray);
-            printf("i:%d,%d\n",i,i*4);
             _add_round_key(plain_array,ext_key,4*i);
         }
         for(j=0;j<4;j++){
@@ -382,8 +370,6 @@ aes_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int
             }
         }
     }
-    printf("plain_array:%p\n:",plain_array);
-    // free(plain_array);
 }
 
 void
@@ -394,8 +380,7 @@ aes_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain,int
         0x0D, 0x09, 0x0E, 0x0B,
         0x0B, 0x0D, 0x09, 0x0E
     };
-    unsigned char secret_array[4][4],s_box[256],is_box[256],(*ext_key)[44]=malloc(4*44);   
-    //狗屎，ext_key非得用malloc或者一维数组才正常！用二维数组莫名其妙的值传过去不对，不知道是不是系统的bug(还有个说法是栈内存是不保证连续的)
+    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][44];   
     int i,j,k;
 
     _gen_is_box(is_box);
@@ -403,10 +388,6 @@ aes_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain,int
     _gen_ext_key(key,ext_key,s_box);
     for(k=0;k<count;k++){
         _string_to_array(secret+k*16,secret_array);
-            // for(i=0;i<4*44;i++){
-        //     printf("%c%d",i%4==0 && i?'\n':' ',ext_key[i%4][i/4]);
-        // }
-        printf("de:%d %p\n",ext_key[0][36],ext_key);
         for(i=10;i>0;i--){
             _add_round_key(secret_array,ext_key,4*i);
             if(i!=10)
@@ -422,29 +403,4 @@ aes_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain,int
             }
         }
     }
-    free(ext_key);
-}
-
-
-
-
-//for test
-
-
-int
-main(){
-    unsigned char secret[16*5+1],plain[16*5+1];
-    int i;
-    
-    aes_encrypt("hello,world,you!hello,world,you!hello,world,you!hello,world,you!hello,world,you!","zccdefkhijolabcd",secret,5);
-    // for(i=0;i<16*5;i++)
-    //     printf("%d ",secret[i]);
-    // printf("\n");
-    aes_decrypt(secret,"zccdefkhijolabcd",plain,5);
-    // for(i=0;i<16;i++)
-    //     printf("%d ",plain[i]);
-    plain[16*5]='\0';
-    printf("%s\n",plain);
- 
-    return 0;
 }
