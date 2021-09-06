@@ -415,7 +415,7 @@ aes_cbc_encrypt(unsigned char * plain,unsigned char * key,unsigned char * _vi,un
         0x03, 0x01, 0x01, 0x02
     };
     unsigned char s_box[256],ext_key[4][44],plain_array[4][4],vi[4][4];
-    int i,j,k;
+    int i,j,k,h;
 
     _string_to_array(_vi,vi);
     _gen_s_box(s_box);
@@ -423,7 +423,7 @@ aes_cbc_encrypt(unsigned char * plain,unsigned char * key,unsigned char * _vi,un
     for(k=0;k<count;k++){
         _string_to_array(plain+k*16,plain_array);
         
-        _add_round_key(plain_array,vi,0);                        //cbc处理，函数复用
+        for(h=0;h<16;h++) plain_array[h%4][h>>2]^=vi[h%4][h>>2];
 
         _add_round_key(plain_array,ext_key,0);
         for(i=1;i<11;i++){
@@ -449,8 +449,7 @@ aes_cbc_decrypt(unsigned char * secret,unsigned char * key,char * _vi,unsigned c
         0x0D, 0x09, 0x0E, 0x0B,
         0x0B, 0x0D, 0x09, 0x0E
     };
-    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][44],vi[4][4],temp[16];   
-    //又有问题，艹，，，temp只能用一维数组，用二维不行，想不通为什么，明明二维数组地址也是连续的（还特地测试了下）
+    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][44],vi[4][4],temp[4][4];   
     int i,j,k,h;
 
     _string_to_array(_vi,vi);
@@ -461,6 +460,7 @@ aes_cbc_decrypt(unsigned char * secret,unsigned char * key,char * _vi,unsigned c
     for(k=0;k<count;k++){      
         _string_to_array(secret+k*16,secret_array);
         memcpy(temp,secret_array,16);                                   //下一趟用
+
         for(i=10;i>0;i--){
             _add_round_key(secret_array,ext_key,4*i);
             if(i!=10)
@@ -470,7 +470,7 @@ aes_cbc_decrypt(unsigned char * secret,unsigned char * key,char * _vi,unsigned c
         }
         _add_round_key(secret_array,ext_key,0);
         
-        _add_round_key(secret_array,vi,0);                            //cbc处理，函数复用
+        for(h=0;h<16;h++) secret_array[h%4][h>>2]^=vi[h%4][h>>2];
         memcpy(vi,temp,16);
 
         for(j=0;j<4;j++){
