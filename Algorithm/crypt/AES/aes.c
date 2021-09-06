@@ -342,7 +342,7 @@ print_box(unsigned char box[256],int flag){
 }
 
 void 
-aes_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int count){
+aes_ecb_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int count){
     unsigned char MixArray[4][4] ={
         0x02, 0x03, 0x01, 0x01,
         0x01, 0x02, 0x03, 0x01,
@@ -351,6 +351,7 @@ aes_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int
     };
     unsigned char s_box[256],ext_key[4][44],plain_array[4][4];
     int i,j,k;
+
     _gen_s_box(s_box);
     _gen_ext_key(key,ext_key,s_box);
     for(k=0;k<count;k++){
@@ -373,7 +374,7 @@ aes_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret,int
 }
 
 void
-aes_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain,int count){
+aes_ecb_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain,int count){
     unsigned char I_MixArray[4][4] ={
         0x0E, 0x0B, 0x0D, 0x09,
         0x09, 0x0E, 0x0B, 0x0D,
@@ -397,6 +398,81 @@ aes_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain,int
         }
         _add_round_key(secret_array,ext_key,0);
         
+        for(j=0;j<4;j++){
+            for(i=0;i<4;i++){
+                plain[j*4+i+k*16]=secret_array[i][j];
+            }
+        }
+    }
+}
+
+void 
+aes_cbc_encrypt(unsigned char * plain,unsigned char * key,unsigned char * _vi,unsigned char * secret,int count){
+    unsigned char MixArray[4][4] ={
+        0x02, 0x03, 0x01, 0x01,
+        0x01, 0x02, 0x03, 0x01,
+        0x01, 0x01, 0x02, 0x03,
+        0x03, 0x01, 0x01, 0x02
+    };
+    unsigned char s_box[256],ext_key[4][44],plain_array[4][4],vi[4][4];
+    int i,j,k;
+
+    _string_to_array(_vi,vi);
+    _gen_s_box(s_box);
+    _gen_ext_key(key,ext_key,s_box);
+    for(k=0;k<count;k++){
+        _string_to_array(plain+k*16,plain_array);
+        
+        _add_round_key(plain_array,vi,0);                        //cbc处理，函数复用
+
+        _add_round_key(plain_array,ext_key,0);
+        for(i=1;i<11;i++){
+            _char_substitution(plain_array,s_box);
+            _shift_rows(plain_array);
+            if(i!=10)
+                _mix_colum(plain_array,MixArray);
+            _add_round_key(plain_array,ext_key,4*i);
+        }
+        for(j=0;j<4;j++){
+            for(i=0;i<4;i++){
+                secret[j*4+i+k*16]=vi[i][j]=plain_array[i][j];
+            }
+        }
+    }
+}
+
+void
+aes_cbc_decrypt(unsigned char * secret,unsigned char * key,char * _vi,unsigned char * plain,int count){
+    unsigned char I_MixArray[4][4] ={
+        0x0E, 0x0B, 0x0D, 0x09,
+        0x09, 0x0E, 0x0B, 0x0D,
+        0x0D, 0x09, 0x0E, 0x0B,
+        0x0B, 0x0D, 0x09, 0x0E
+    };
+    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][44],vi[4][4],temp[16];   
+    //又有问题，艹，，，temp只能用一维数组，用二维不行，想不通为什么，明明二维数组地址也是连续的（还特地测试了下）
+    int i,j,k,h;
+
+    _string_to_array(_vi,vi);
+    _gen_is_box(is_box);
+    _gen_s_box(s_box);
+    _gen_ext_key(key,ext_key,s_box);
+
+    for(k=0;k<count;k++){      
+        _string_to_array(secret+k*16,secret_array);
+        memcpy(temp,secret_array,16);                                   //下一趟用
+        for(i=10;i>0;i--){
+            _add_round_key(secret_array,ext_key,4*i);
+            if(i!=10)
+                _mix_colum(secret_array,I_MixArray);
+            _i_shift_rows(secret_array);
+            _char_substitution(secret_array,is_box);        
+        }
+        _add_round_key(secret_array,ext_key,0);
+        
+        _add_round_key(secret_array,vi,0);                            //cbc处理，函数复用
+        memcpy(vi,temp,16);
+
         for(j=0;j<4;j++){
             for(i=0;i<4;i++){
                 plain[j*4+i+k*16]=secret_array[i][j];
