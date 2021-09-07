@@ -96,6 +96,22 @@ const unsigned char ReS_Table[256] =
 };
 
 */
+#include"aes.h"
+
+#ifdef AES_256
+    #define NR 14
+    #define NK 8
+    #define EKC 60
+#elif defined(AES_192)
+    #define NR 12
+    #define NK 6
+    #define EKC 52
+#else
+    #define NR 10
+    #define NK 4
+    #define EKC 44
+#endif
+
 static int
 _get_hightest_position(unsigned short Number)
 {
@@ -203,7 +219,7 @@ _get_isbox_element(int input){
 }
 
 static void
-_key_box_substitution(unsigned char (*ext_key)[44],unsigned char box[256],int coln){
+_key_box_substitution(unsigned char (*ext_key)[EKC],unsigned char box[256],int coln){
     int i=0;
 
     for(;i<4;i++){
@@ -212,15 +228,24 @@ _key_box_substitution(unsigned char (*ext_key)[44],unsigned char box[256],int co
 }
 
 static void
-_g_func(unsigned char (*ext_key)[44],unsigned char box[256],int coln){
-    const unsigned int rcon[11] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 };
+_g_func(unsigned char (*ext_key)[EKC],unsigned char box[256],int coln,unsigned char * rcon){
     int i=0;
 
     for(;i<4;i++){
         ext_key[i][coln]=ext_key[(i+1)%4][coln-1];
     }
     _key_box_substitution( ext_key, box, coln );
-    ext_key[0][coln]^=rcon[coln>>2];
+    ext_key[0][coln]^=rcon[coln/NK];
+}
+
+static void
+_gen_rcon(unsigned char *rcon){
+    int i;
+
+    rcon[0]=0,rcon[1]=1;
+    for(i=2;i<=NR;i++){
+        rcon[i]=_multiplication_256(2,rcon[i-1]);
+    }
 }
 
 static void
@@ -248,22 +273,30 @@ _gen_is_box(unsigned char is_box[256]){
 }
 
 static void
-_gen_ext_key(unsigned char * key,unsigned char (*ext_key)[44],unsigned char box[256]){
+_gen_ext_key(unsigned char * key,unsigned char (*ext_key)[EKC],unsigned char box[256]){
     int i=0,j,k;
+    unsigned char rcon[NR+1];
 
-    for(;i<16;i++){
+    for(;i<NK*4;i++){
         ext_key[i%4][i>>2]=key[i];
     }
     
-    for(i=1;i<11;i++){
-        _g_func(ext_key,box,4*i);
+    _gen_rcon(rcon);
+
+    for(i=1;i<(EKC+NK-1)/NK;i++){
+        _g_func(ext_key,box,NK*i,rcon);
         for(j=0;j<4;j++){
-            ext_key[j][4*i]^=ext_key[j][4*(i-1)];
+            ext_key[j][NK*i]^=ext_key[j][NK*(i-1)];
         }
 
-        for(j=1;j<4;j++){
+        for(j=1;j<NK && NK*i+j<EKC;j++){
+            #ifdef AES_256
+                if(j%NK==4){
+                    _key_box_substitution( ext_key, box, NK*i+j );
+                }
+            #endif
             for(k=0;k<4;k++){
-                ext_key[k][4*i+j]=ext_key[k][4*(i-1)+j]^ext_key[k][4*i+j-1];
+                ext_key[k][NK*i+j]=ext_key[k][NK*(i-1)+j]^ext_key[k][NK*i+j-1];
             }
         }
     }
@@ -279,7 +312,7 @@ _string_to_array(unsigned char * s,unsigned char (*plain_array)[4]){
 }
 
 static void
-_add_round_key(unsigned char (*plain_array)[4],unsigned char (*ext_key)[44],int start_col){
+_add_round_key(unsigned char (*plain_array)[4],unsigned char (*ext_key)[EKC],int start_col){
     int i,j,k;
 
     for(k=0,j=start_col,start_col+=4;j<start_col;j++,k++){
@@ -349,7 +382,7 @@ aes_ecb_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret
         0x01, 0x01, 0x02, 0x03,
         0x03, 0x01, 0x01, 0x02
     };
-    unsigned char s_box[256],ext_key[4][44],plain_array[4][4];
+    unsigned char s_box[256],ext_key[4][EKC],plain_array[4][4];
     int i,j,k;
 
     _gen_s_box(s_box);
@@ -358,10 +391,10 @@ aes_ecb_encrypt(unsigned char * plain,unsigned char * key,unsigned char * secret
         _string_to_array(plain+k*16,plain_array);
         
         _add_round_key(plain_array,ext_key,0);
-        for(i=1;i<11;i++){
+        for(i=1;i<=NR;i++){
             _char_substitution(plain_array,s_box);
             _shift_rows(plain_array);
-            if(i!=10)
+            if(i!=NR)
                 _mix_colum(plain_array,MixArray);
             _add_round_key(plain_array,ext_key,4*i);
         }
@@ -381,7 +414,7 @@ aes_ecb_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain
         0x0D, 0x09, 0x0E, 0x0B,
         0x0B, 0x0D, 0x09, 0x0E
     };
-    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][44];   
+    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][EKC];   
     int i,j,k;
 
     _gen_is_box(is_box);
@@ -389,9 +422,9 @@ aes_ecb_decrypt(unsigned char * secret,unsigned char * key,unsigned char * plain
     _gen_ext_key(key,ext_key,s_box);
     for(k=0;k<count;k++){
         _string_to_array(secret+k*16,secret_array);
-        for(i=10;i>0;i--){
+        for(i=NR;i>0;i--){
             _add_round_key(secret_array,ext_key,4*i);
-            if(i!=10)
+            if(i!=NR)
                 _mix_colum(secret_array,I_MixArray);
             _i_shift_rows(secret_array);
             _char_substitution(secret_array,is_box);        
@@ -414,7 +447,7 @@ aes_cbc_encrypt(unsigned char * plain,unsigned char * key,unsigned char * _vi,un
         0x01, 0x01, 0x02, 0x03,
         0x03, 0x01, 0x01, 0x02
     };
-    unsigned char s_box[256],ext_key[4][44],plain_array[4][4],vi[4][4];
+    unsigned char s_box[256],ext_key[4][EKC],plain_array[4][4],vi[4][4];
     int i,j,k,h;
 
     _string_to_array(_vi,vi);
@@ -426,10 +459,10 @@ aes_cbc_encrypt(unsigned char * plain,unsigned char * key,unsigned char * _vi,un
         for(h=0;h<16;h++) plain_array[h%4][h>>2]^=vi[h%4][h>>2];
 
         _add_round_key(plain_array,ext_key,0);
-        for(i=1;i<11;i++){
+        for(i=1;i<=NR;i++){
             _char_substitution(plain_array,s_box);
             _shift_rows(plain_array);
-            if(i!=10)
+            if(i!=NR)
                 _mix_colum(plain_array,MixArray);
             _add_round_key(plain_array,ext_key,4*i);
         }
@@ -449,7 +482,7 @@ aes_cbc_decrypt(unsigned char * secret,unsigned char * key,char * _vi,unsigned c
         0x0D, 0x09, 0x0E, 0x0B,
         0x0B, 0x0D, 0x09, 0x0E
     };
-    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][44],vi[4][4],temp[4][4];   
+    unsigned char secret_array[4][4],s_box[256],is_box[256],ext_key[4][EKC],vi[4][4],temp[4][4];   
     int i,j,k,h;
 
     _string_to_array(_vi,vi);
@@ -461,9 +494,9 @@ aes_cbc_decrypt(unsigned char * secret,unsigned char * key,char * _vi,unsigned c
         _string_to_array(secret+k*16,secret_array);
         memcpy(temp,secret_array,16);                                   //下一趟用
 
-        for(i=10;i>0;i--){
+        for(i=NR;i>0;i--){
             _add_round_key(secret_array,ext_key,4*i);
-            if(i!=10)
+            if(i!=NR)
                 _mix_colum(secret_array,I_MixArray);
             _i_shift_rows(secret_array);
             _char_substitution(secret_array,is_box);        
