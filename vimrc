@@ -318,7 +318,7 @@ se nu
 nnoremap <silent> <F12> :A<cr>
 
 inoremap ( ()<ESC>i
-inoremap { {<CR>}<LEFT><CR><UP><RIGHT><TAB>
+inoremap {<CR> {<CR>}<LEFT><CR><UP><TAB>
 inoremap [ []<ESC>i
 inoremap " ""<ESC>i
 inoremap ' ''<ESC>i
