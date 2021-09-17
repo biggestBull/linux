@@ -57,12 +57,6 @@ highlight StatusLineNC guifg=Gray guibg=White
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 " 文件设置 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
-" 不要备份文件（根据自己需要取舍） 
-set nobackup 
- 
-" 不要生成swap文件，当buffer被丢弃的时候隐藏它 
-setlocal noswapfile 
-set bufhidden=hide 
  
 " 字符间插入的像素行数目 
 set linespace=0 
@@ -132,10 +126,6 @@ set laststatus=2
 set formatoptions=tcrqn 
 " 继承前一行的缩进方式，特别适用于多行注释 
 set autoindent 
-" 为C程序提供自动缩进 
-set smartindent 
-" 使用C样式的缩进 
-set cindent 
 " 制表符为4 
 set tabstop=4 
 " 统一缩进为4 
@@ -145,8 +135,6 @@ set shiftwidth=4
 set noexpandtab 
 " 不要换行 
 set nowrap 
-" 在行和段开始处使用制表符 
-set smarttab 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 " CTags的设定 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
