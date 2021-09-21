@@ -1,7 +1,6 @@
 #ifndef LEFTHEAP_HEAD
 #define LEFTHEAP_HEAD
 
-#include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 

@@ -1,8 +1,5 @@
 #include"./AVLTree.h"
 
-static enum Value_Type _value_type;
-static void * _temp_p;
-
 static int 
 get_height(struct AVLTree_Node * Node){
    if(Node==NULL)
@@ -51,18 +48,18 @@ right_rotate_double(struct AVLTree_Node * Node){
 }
 
 static void
-new_node(struct AVLTree_Node * Node,int key,void * value,enum Value_Type value_type,int flag){
+new_node(struct AVLTree_Node * Node,key_t key,void * value,int flag){
    Node->key=key;
    Node->value=value;
-   Node->value_type=value_type;
    Node->height=0;
    if(flag!=0)
       Node->left=Node->right=NULL;
 }
 
 static struct AVLTree_Node * 
-_insert_node(struct AVLTree_Node * Root,int key,void * value){
+_insert_node(struct AVLTree_Node * Root,key_t key,void * value){
    int left_height,right_height;
+   void * _temp_p;
 
    if(Root!=NULL){
       if(Root->key>key){
@@ -70,10 +67,11 @@ _insert_node(struct AVLTree_Node * Root,int key,void * value){
          Root->left=_temp_p?_temp_p:Root->left;
       }
       else if(Root->key<key){
-          _temp_p= _insert_node(Root->right,key,value);   
+           _temp_p= _insert_node(Root->right,key,value);   
            Root->right=_temp_p?_temp_p:Root->right;
       }else{
-         return NULL;    
+		 Root->value=value;
+         return Root;    
       }
       if(_temp_p!=NULL){
          left_height=get_height(Root->left);
@@ -102,7 +100,7 @@ _insert_node(struct AVLTree_Node * Root,int key,void * value){
       if((Root=malloc(sizeof(struct AVLTree_Node )))==NULL){
           return NULL;      
       }
-      new_node(Root,key,value,_value_type,1);      
+      new_node(Root,key,value,1);      
    }
    return Root;
 }
@@ -110,10 +108,11 @@ _insert_node(struct AVLTree_Node * Root,int key,void * value){
 static struct AVLTree_Node *
 _cover_by_Rmin(struct AVLTree_Node * dest,struct AVLTree_Node * Root){
     int left_height,right_height;
+	void * _temp_p;
     
     if(Root->left==NULL){
        _temp_p=Root->right;
-       new_node(dest,Root->key,Root->value,Root->value_type,0);
+       new_node(dest,Root->key,Root->value,0);
        free(Root);
        return _temp_p;
     }
@@ -140,8 +139,10 @@ _cover_by_Rmin(struct AVLTree_Node * dest,struct AVLTree_Node * Root){
 }
 
 static struct AVLTree_Node *
-_delete_AVLT(struct AVLTree_Node * Root,int key){
+_delete_AVLT(struct AVLTree_Node * Root,key_t key){
    int left_height,right_height;
+   void * _temp_p;
+
    if(Root!=NULL){
        if(Root->key==key){
           if(Root->left && Root->right){
@@ -156,9 +157,9 @@ _delete_AVLT(struct AVLTree_Node * Root,int key){
           }
 
        }else if(Root->key>key){
-          Root->left=delete_AVLT(Root->left,key);      
+          Root->left=_delete_AVLT(Root->left,key);      
        }else{
-         Root->right =delete_AVLT(Root->right,key);      
+         Root->right =_delete_AVLT(Root->right,key);      
        }
       
        left_height=get_height(Root->left);
@@ -178,8 +179,6 @@ _delete_AVLT(struct AVLTree_Node * Root,int key){
              Root= left_rotate_double(Root);        
           }
        }
-   }else{
-       _value_type=1;     
    }
             
    return Root; 
@@ -187,21 +186,23 @@ _delete_AVLT(struct AVLTree_Node * Root,int key){
 
 
 
-struct AVLTree_Node *
-create_AVLT(int key,void * value,enum Value_Type value_type){
-   struct AVLTree_Node * Root;
+struct AVLTree_ST *
+create_AVLT(enum Value_Type value_type){
+   struct AVLTree_ST * AVLT;
 
-   if((Root=malloc(sizeof(struct AVLTree_Node)))==NULL)
+   if((AVLT=malloc(sizeof(struct AVLTree_ST)))==NULL)
        return NULL;
-   new_node(Root,key,value,value_type,1);
+   AVLT->value_type=value_type;
+   AVLT->Root=NULL;
 
-   return Root;
+   return AVLT;
 }
 
 int
-search_AVLT(struct AVLTree_Node * Root,int key,void * rt_value){
-    
-   _value_type=Root->value_type;
+search_AVLT(struct AVLTree_ST * AVLT,key_t key,void * rt_value){
+   enum Value_Type _value_type=AVLT->value_type;
+   struct AVLTree_Node * Root=AVLT->Root;
+
    while(Root!=NULL){
        if(Root->key==key){
           switch(_value_type){
@@ -231,21 +232,40 @@ search_AVLT(struct AVLTree_Node * Root,int key,void * rt_value){
 }
 
 struct AVLTree_Node *
-insert_AVLT(struct AVLTree_Node * Root,int key,void * value){
-   
-   _value_type=Root->value_type;                             //留作日后扩展之用，返回状态信息。
+insert_AVLT(struct AVLTree_ST * AVLT,key_t key,void * value){
+   struct AVLTree_Node * Root;
 
-   return _insert_node(Root,key,value);
+   Root = _insert_node(AVLT->Root,key,value);
+   if(Root){
+	  AVLT->Root=Root;
+   }
+   return Root;                                            //插入是否成功（更新属于插入成功）
 }
 
 struct AVLTree_Node *
-delete_AVLT(struct AVLTree_Node * Root,int key){
-    _value_type=0;                                       
-    Root=_delete_AVLT(Root,key);
-    return Root; 
+delete_AVLT(struct AVLTree_ST * AVLT,key_t key){
+	AVLT->Root=_delete_AVLT(AVLT->Root,key);
+    return AVLT->Root;                                     //经删除后是否还有节点
 }
 
+void
+static _free_Nodes(struct AVLTree_Node * Root){
+	if(Root){
+		if(Root->left){
+			_free_Nodes(Root->left);
+		}
+		if(Root->right){
+			_free_Nodes(Root->right);
+		}
+		free(Root);
+	}
+}
 
+void
+free_AVLT(struct AVLTree_ST * AVLT){
+	_free_Nodes(AVLT->Root);
+	free(AVLT);
+}
 
 
 
