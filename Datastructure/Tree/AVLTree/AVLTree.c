@@ -184,7 +184,18 @@ _delete_AVLT(struct AVLTree_Node * Root,key_t key){
    return Root; 
 }
 
-
+void
+static _free_Nodes(struct AVLTree_Node * Root){
+	if(Root){
+		if(Root->left){
+			_free_Nodes(Root->left);
+		}
+		if(Root->right){
+			_free_Nodes(Root->right);
+		}
+		free(Root);
+	}
+}
 
 struct AVLTree_ST *
 create_AVLT(enum Value_Type value_type){
@@ -196,6 +207,12 @@ create_AVLT(enum Value_Type value_type){
    AVLT->Root=NULL;
 
    return AVLT;
+}
+
+void
+free_AVLT(struct AVLTree_ST * AVLT){
+	_free_Nodes(AVLT->Root);
+	free(AVLT);
 }
 
 int
@@ -247,51 +264,3 @@ delete_AVLT(struct AVLTree_ST * AVLT,key_t key){
 	AVLT->Root=_delete_AVLT(AVLT->Root,key);
     return AVLT->Root;                                     //经删除后是否还有节点
 }
-
-void
-static _free_Nodes(struct AVLTree_Node * Root){
-	if(Root){
-		if(Root->left){
-			_free_Nodes(Root->left);
-		}
-		if(Root->right){
-			_free_Nodes(Root->right);
-		}
-		free(Root);
-	}
-}
-
-void
-free_AVLT(struct AVLTree_ST * AVLT){
-	_free_Nodes(AVLT->Root);
-	free(AVLT);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
