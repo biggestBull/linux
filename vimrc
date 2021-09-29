@@ -74,7 +74,7 @@ set backspace=2
 " 允许backspace和光标键跨越行边界 
 set whichwrap+=<,>,h,l 
  
-" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）i
+" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）
 " 但是会导致无法右击复制内容
 set mouse=a 
 
