@@ -74,8 +74,13 @@ set backspace=2
 " 允许backspace和光标键跨越行边界 
 set whichwrap+=<,>,h,l 
  
-" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位） 
-set mouse=v 
+" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）i
+" 但是会导致无法右击复制内容
+set mouse=a 
+
+" 可以复制内容，但是会失去鼠标点击的效果
+" set mouse=v
+
 set selection=exclusive 
 set selectmode=mouse,key 
  
