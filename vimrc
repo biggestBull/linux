@@ -74,12 +74,16 @@ set backspace=2
 " 允许backspace和光标键跨越行边界 
 set whichwrap+=<,>,h,l 
  
-" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）
-" 但是会导致无法右击复制内容
+" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）,但是会导致
+" 无法右击复制内容
 set mouse=a 
 
-" 可以复制内容，但是会失去鼠标点击的效果
+" 可以复制内容，但是会失去鼠标点击的效果,一种好的做法是搞个快捷键在mouse=v和a之间切换
 " set mouse=v
+
+" 正常模式下可以按ctrl+shift+V、A临时切换相应模式
+nnoremap <C-S-V> :set mouse=v<CR>
+nnoremap <C-S-A> :set mouse=a<CR>
 
 set selection=exclusive 
 set selectmode=mouse,key 
@@ -315,4 +319,7 @@ inoremap {<CR> {<CR>}<LEFT><CR><UP><TAB>
 inoremap [ []<ESC>i
 inoremap " ""<ESC>i
 inoremap ' ''<ESC>i
+
+" 插入模式下另起一行输入(ctrl+O,注意这覆盖了默认的键功能),ctrl+回车似乎映射不了，没法子
+inoremap <C-o> <ESC>o
 
