@@ -5,9 +5,11 @@ _initGraphInfo(int size,struct Queue * queue,int v,ljb_st ** ljbs){
    graphinfo_st *  graphinfo;
 
    if((graphinfo=malloc(sizeof(graphinfo_st)*size))==NULL)
-       return NULL;
-   if(create_queue(queue,PTR)!=0)
-       return NULL;
+		return NULL;
+   if(create_queue(queue,PTR)!=0){
+		free(graphinfo);
+		return NULL;
+	}
    for(size--;size>=0;size--){
        graphinfo[size].distance=(unsigned int)(-1)/2;
        graphinfo[size].father=-1;

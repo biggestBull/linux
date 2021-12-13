@@ -76,8 +76,10 @@ init_LPTable(enum LP_Type lp_type){
    size=next_prime(INIT_SIZE);
    if((table=malloc(sizeof(struct LP_Table)))==NULL)
        return NULL;
-   if((table->addr=malloc(sizeof(struct LP_Node *)*size))==NULL)
+   if((table->addr=malloc(sizeof(struct LP_Node *)*size))==NULL){
+       free(table);
        return NULL;
+	}
    table->size=size;
    table->cur_count=0;
    table->type=lp_type;

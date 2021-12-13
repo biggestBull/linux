@@ -21,8 +21,10 @@ create_Heap(enum _TYPE heap_type,int flag,void * (*func)(void *)){
 
    if((heap=malloc(sizeof(struct Heap)))==NULL)
        return NULL;
-   if((heap->arr=malloc(sizeof(unsigned long)*HEAP_INIT_SIZE))==NULL)
+   if((heap->arr=malloc(sizeof(unsigned long)*HEAP_INIT_SIZE))==NULL){
+       free(heap);
        return NULL;
+   }
    heap->type=heap_type;
    heap->size=HEAP_INIT_SIZE;
    heap->cur_size=0;

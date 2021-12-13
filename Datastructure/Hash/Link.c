@@ -80,8 +80,10 @@ init_Hash_Table(enum Value_Type value_type){
        return NULL;
    HLT->size=next_prime(INIT_SIZE);
    
-   if((HLT->addr=malloc(HLT->size*sizeof(struct HashByLink_Node*)))==NULL)
+   if((HLT->addr=malloc(HLT->size*sizeof(struct HashByLink_Node*)))==NULL){
+	   free(HLT);
        return NULL;
+	}
    HLT->value_type=value_type;
    HLT->cur_count=0;
    memset(HLT->addr,0,HLT->size*sizeof(struct HashByLink_Node *));

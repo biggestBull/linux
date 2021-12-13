@@ -85,8 +85,10 @@ init_DHTable(enum DH_Type lp_type){
    size=next_prime(INIT_SIZE);
    if((table=malloc(sizeof(struct DH_Table)))==NULL)
        return NULL;
-   if((table->addr=malloc(sizeof(struct DH_Node *)*size))==NULL)
+   if((table->addr=malloc(sizeof(struct DH_Node *)*size))==NULL){
+	   free(table);
        return NULL;
+	}
    table->hash2prime=next_prime(INIT_SIZE/2);
    table->size=size;
    table->cur_count=0;

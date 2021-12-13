@@ -77,8 +77,10 @@ init_SPTable(enum SP_Type lp_type){
    size=next_prime(INIT_SIZE);
    if((table=malloc(sizeof(struct SP_Table)))==NULL)
        return NULL;
-   if((table->addr=malloc(sizeof(struct SP_Node *)*size))==NULL)
+   if((table->addr=malloc(sizeof(struct SP_Node *)*size))==NULL){
+	   free(table);
        return NULL;
+	}
    table->size=size;
    table->cur_count=0;
    table->type=lp_type;
