@@ -3,7 +3,7 @@
 
 static int 
 _inorder(general_st * gst,int fd,int seq,int * max,int *buf_i,char * buf,int * byte_sum,char * string){
-    int len,stats;
+    int len,stats=0;
     ++*max;
     if(gst->l)
         stats=_inorder(gst->l,fd,seq+1,max,buf_i,buf,byte_sum,string);
@@ -28,7 +28,7 @@ _inorder(general_st * gst,int fd,int seq,int * max,int *buf_i,char * buf,int * b
 
 static int 
 _preorder(general_st * gst,int size,int fd,int *buf_i,int *databuf_i,char * data_buf,char * string){
-    int len,stats;
+    int len,stats=0;
     if(*databuf_i+size-2*sizeof(unsigned long)>=BUF_SIZE){
        if(write(fd,data_buf,*databuf_i)!=*databuf_i)
            return -1;

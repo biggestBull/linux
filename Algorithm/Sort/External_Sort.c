@@ -121,7 +121,7 @@ _init(int mem_size,int num,int fd,struct Queue * queue_in,int flag,char c){
 static int
 _writeToFile(file_info * fi,int fd,int flag,char c){
    char temp[20];
-   int count=0,j=0, pos=0,pre_num,i,len;
+   int count=0,j=0, pos=0,pre_num,i=0,len;
    lseek(fd,0,SEEK_SET); 
    while((count=read(fi->fd,fi->buffer,fi->buffer_size*sizeof(int)))>0){
        count/=sizeof(int);
@@ -207,8 +207,10 @@ _start(struct Out_IN * out_in,int num,struct Queue * queue_out,int flag){
    extreme=flag?_MIN_INT:_MAX_INT;
    if((successTree=malloc(sizeof(int)*(num+1)))==NULL)
        return -1;
-   if((leaves=malloc(sizeof(int)*(num+1)))==NULL)
+   if((leaves=malloc(sizeof(int)*(num+1)))==NULL){
+       free(successTree);
        return -1;
+   }
    leaves[num]=extreme;
 
    while(out_count!=1){

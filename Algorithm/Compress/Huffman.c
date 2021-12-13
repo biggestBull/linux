@@ -157,7 +157,7 @@ _constructBody(int fd_out,int fd_in,unsigned long * char_code,unsigned long file
    if(write(fd_out,outbuffer,(outbuf_i+7)/8)!=(outbuf_i+7)/8)
        return -1;
    if(flag)
-       printf("100%\n");
+       printf("100%%\n");
    return 0;
 }
 
@@ -281,7 +281,7 @@ _decompressHandler(int fd_in,int fd_out,int flag){
                       if(write(fd_out,outbuffer,outbuf_i)!=outbuf_i)
                           return -1;
                       if(flag)
-                          printf("100%\n");
+                          printf("100%%\n");
                       return 0;
                   }
                   if(outbuf_i>=HFM_BUFFER_SIZE){
@@ -327,10 +327,11 @@ Huffman_compress(const char * filepath,const char * outfilepath,int flag){
    if((Root=_createHFMTree(char_rate))==NULL)
        return -1;
    if(Root->left==Root->right)
-       return 1;                                          //单字符，无法压缩
+       return 1;                    //左右皆为NULL时才可能相等，这意味着是单个字符，无法压缩
    _getHFMCode(char_code,Root,temp,0);
    if(_writeToFile(fd_in,fd_out,char_rate,char_code,flag)==-1)
        return -1;
+	return 0;
 }
 
 int
