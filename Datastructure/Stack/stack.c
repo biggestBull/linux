@@ -11,6 +11,7 @@ create_stack(struct Stack * stack,enum _TYPE stack_type){
    stack->stack_size=STACK_INIT_SIZE;
    stack->stack_type=stack_type;
    stack->stack_top=-1;
+   return 0;            //万万没想到啊，之前居然漏写了返回值了，而且竟然不报错，似乎gcc默认返回一个垃圾值，凶险。
 }
 
 int

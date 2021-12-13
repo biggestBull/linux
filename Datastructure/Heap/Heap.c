@@ -13,6 +13,7 @@ _judge(enum _TYPE type,void * a,void * b){
        case LONG:
           return (long )a>(long )b?1:-1;
    }
+   return -1;
 }
 
 struct Heap *
@@ -38,7 +39,8 @@ create_Heap(enum _TYPE heap_type,int flag,void * (*func)(void *)){
            *(heap->arr)=flag?(unsigned int)(-1)/2:1<<sizeof(int)*8-1;
            break;
        case LONG:
-           *(heap->arr)=flag?(unsigned long)(-1)/2:1<<sizeof(long)*8-1;
+           *(heap->arr)=flag?(unsigned long)(-1)/2:1L<<sizeof(long)*8-1; 
+		   //字面量默认是int，为了避免溢出，应当加上L标志它是一个long型
            break;
        default:
            return NULL;
