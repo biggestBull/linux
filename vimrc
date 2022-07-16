@@ -24,6 +24,7 @@ set confirm
 " 与windows共享剪贴板 
 set clipboard+=unnamed 
  
+" 也可以在命令模式下手动指定filetype，如 set filetype = cpp 
 " 侦测文件类型 
 filetype on 
  
