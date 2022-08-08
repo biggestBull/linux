@@ -312,6 +312,8 @@ let g:SuperTabDefaultCompletionType="<C-X><C-O>"
 "line
 se nu
  
+" 粘贴时也会被下列这些影响，此时，可以输入 :set paste ，完毕后，可以执行 :set nopaste"
+
 ""
 nnoremap <silent> <F12> :A<cr>
 
