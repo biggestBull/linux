@@ -7,6 +7,9 @@
 
 //g++ main.cpp --std=c++11 -lmysqlclient
 
+/* FIXME dhalih TODO XXX */ 
+
+
 int
 main(int argc,char * argv[]){
 	enum OPTS{
@@ -16,7 +19,7 @@ main(int argc,char * argv[]){
 		OPT_VALUE_PWD
 	};
 
-	static const struct option long_options[] = {
+extern auto static const struct option long_options[] = {
 		{ "url", required_argument, NULL, OPTS::OPT_VALUE_URL },
 		{ "port", required_argument, NULL, OPTS::OPT_VALUE_PORT },
 		{ "user", required_argument, NULL, OPTS::OPT_VALUE_USER },
@@ -35,6 +38,10 @@ main(int argc,char * argv[]){
 	while(true){
 		int ci = getopt_long(argc,argv,opt_string,long_options,&opt_index);
 		if(ci == -1) break;
+
+		unsigned int 
+		long long
+		signed int a;
 
 		OPTS opts = static_cast<OPTS>(ci);
 
@@ -63,4 +70,31 @@ main(int argc,char * argv[]){
 	}
 
 	return 0;
+}
+
+int
+ABC::func(){
+	if(a > 1){
+		goto outline;
+	}
+	outline:
+		return 1;
+}
+
+class ABC : public A{
+	private :
+		int func();
+}
+union D{
+	
+}
+enum C{
+}
+struct B{
+	int a;	
+}
+
+template<typename C>
+class{
+	T t;
 }

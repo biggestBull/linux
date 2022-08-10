@@ -1,9 +1,11 @@
-
 "vimrc配置文件内容如下:
  
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 " 一般设定 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+
+set t_Co=256
+
 " 设定默认解码 
 set fenc=utf-8 
 set fencs=utf-8,usc-bom,euc-jp,gb18030,gbk,gb2312,cp936 
@@ -255,6 +257,7 @@ let g:miniBufExplModSelTarget = 1
 colorscheme desert
 
 autocmd FileType mygo colorscheme mygocolor 
+autocmd FileType cpp colorscheme cppcolor 
 
 " Taglist 配置
 let Tlist_Show_One_File=1

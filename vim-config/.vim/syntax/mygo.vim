@@ -29,25 +29,25 @@ if exists("b:current_syntax")
   finish
 endif
 
-if !exists("go_highlight_array_whitespace_error")
+"if !exists("go_highlight_array_whitespace_error")
  let go_highlight_array_whitespace_error = 0
-endif
+"endif
 
-if !exists("go_highlight_chan_whitespace_error")
+"if !exists("go_highlight_chan_whitespace_error")
  let go_highlight_chan_whitespace_error = 0 
-endif
+"endif
 
 if !exists("go_highlight_extra_types")
   let go_highlight_extra_types = 1
 endif
 
-if !exists("go_highlight_space_tab_error")
+"if !exists("go_highlight_space_tab_error")
  let go_highlight_space_tab_error = 0
-endif
+"endif
 
-if !exists("go_highlight_trailing_whitespace_error")
+"if !exists("go_highlight_trailing_whitespace_error")
   let go_highlight_trailing_whitespace_error = 0 
-endif
+"endif
 
 if !exists("go_highlight_operators")
   let go_highlight_operators = 1
