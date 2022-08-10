@@ -43,4 +43,6 @@ hi diyType	ctermfg=2 cterm=bold
 hi Error	cterm=bold ctermfg=7 ctermbg=1
 hi goLable ctermfg=3
 
+hi goTodo ctermfg=1
+
 "vim: sw=4
