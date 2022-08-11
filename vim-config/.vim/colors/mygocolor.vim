@@ -24,7 +24,7 @@ let g:colors_name="mygocolor"
 hi goStatement	ctermfg=5 cterm=bold 
 hi goDirective ctermfg=1 
 hi Comment ctermfg=4
-hi Keyword  ctermfg=6
+hi Keyword  ctermfg=1 cterm=bold
 hi Conditional ctermfg=5
 hi Repeat ctermfg=5
 hi Function ctermfg=2 

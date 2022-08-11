@@ -226,7 +226,7 @@ hi def link     goSpaceError        Error
 " included from: https://github.com/athom/more-colorful.vim/blob/master/after/syntax/go.vim
 "
 " Comments; their contents
-syn keyword     goTodo              contained NOTE FIXME TODO XXX
+syn keyword     goTodo              contained NOTE
 hi def link     goTodo              Todo
 
 
