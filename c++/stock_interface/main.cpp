@@ -16,7 +16,7 @@ main(int argc,char * argv[]){
 		OPT_VALUE_PWD
 	};
 
-	static const struct option long_options[] = {
+	static const option long_options[] = {
 		{ "url", required_argument, NULL, OPTS::OPT_VALUE_URL },
 		{ "port", required_argument, NULL, OPTS::OPT_VALUE_PORT },
 		{ "user", required_argument, NULL, OPTS::OPT_VALUE_USER },
