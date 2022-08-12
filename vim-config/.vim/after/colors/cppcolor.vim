@@ -47,6 +47,8 @@ hi cConstant ctermfg=94
 
 hi cStorageClass ctermfg=76
 
+hi cIncluded ctermfg=208
+
 " c       -----end
 
 " 写在注释中的标记
