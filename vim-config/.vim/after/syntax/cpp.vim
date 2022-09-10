@@ -2888,6 +2888,27 @@ if version >= 508 || !exists("did_cpp_syntax_inits")
 endif
 
 
+" TODO 我写的：start
+
+
+syn match	 FZOperator /=/
+syn match	 GXOperator	/[><]/ 
+syn match	 SSOperator	/[+\-\*\/&|^~]\|\(>>\)\|\(<<\)/ 
+syn match	 LJOperator	/!/   
+syn match	 GXOperator	/\(!=\)a\|\(==\)\|\(>=\)\|\(<=\)/ 
+syn match	 LJOperator	/\(||\)\|\(&&\)/   
+syn match	 DKHOperator	/[{}]/   
+syn match	 ZKHOperator	/\[\|\]/
+syn match	 XKHOperator /[()]/  
+			
+" 对main函数似乎不生效
+" 放弃自定义函数的匹配，很难做到，一堆的BUG，基本上只能通过生成本地tag数据库来实现
+" syn region callFunction start="[a-zA-Z_][a-zA-Z_0-9]*"hs=s end="(.\{-})\s*[;,]"he=s-1,me=s-1 oneline
+syn region className start=/\(class\|struct\)\@<=\s\+/hs=e end=/[a-zA-Z_][a-zA-Z_0-9]*/he=e oneline  
+
+"我写的：end
+
+
 " when in $VIMRUNTIME -----------------
 
 " let b:current_syntax = "cpp"

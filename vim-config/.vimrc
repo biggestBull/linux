@@ -1,6 +1,22 @@
 "vimrc配置文件内容如下:
  
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+" 插件: vim-plug
+"	install:
+"		curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+"			 https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
+
+call plug#begin('~/.vim/plugged')
+
+" 炫酷状态栏
+Plug 'vim-airline/vim-airline'       
+Plug 'vim-airline/vim-airline-themes' "airline 的主题
+
+call plug#end()
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 " 一般设定 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""" 
 

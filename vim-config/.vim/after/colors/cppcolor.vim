@@ -10,7 +10,6 @@
 " :he highlight-groups
 " :he cterm-colors
 
-set background=dark
 if version > 580
     " no guarantees for version 5.8 and below, but this makes it stop
     " complaining
@@ -19,17 +18,25 @@ if version > 580
 	syntax reset
     endif
 endif
+
 let g:colors_name="cppcolor"
 
+" 设置背景色
+hi Normal ctermfg=231 ctermbg=236 cterm=NONE
+
+" 注释
 hi Comment ctermfg=61
 
-"
+hi normal ctermfg=lightgray
 
+" goto break return continue 等转变流程的关键字, 以及asm
 hi cStatement ctermfg=118
+" if else switch 
 hi cConditional ctermfg=201
-hi cRepeat ctermfg=93
+" 循环 关键字
+hi cRepeat ctermfg=198
 
-"格式化控制符
+" 格式化控制符：%d  %o %x %u 这种
 hi cSpecial ctermfg=6  
 hi cFormat ctermfg=brown   
 
@@ -103,5 +110,27 @@ hi cppSTLiterator_tag ctermfg=69
 hi cppSTLnamespace ctermfg=40
 hi cppSTLtype ctermfg=79
 hi cppSTLcast ctermfg=209
+
+" 我写的: start
+" 函数调用,放弃
+"hi callFunction	ctermfg=2
+" 类名
+hi className	ctermfg=1
+
+" 赋值
+hi FZOperator ctermfg=5
+
+" 算术运算符:加减乘除位运算  
+hi SSOperator ctermfg=1
+" 逻辑运算符  
+hi LJOperator ctermfg=44
+hi GXOperator ctermfg=3
+
+" 括号
+hi DKHOperator ctermfg=201
+hi ZKHOperator ctermfg=2
+hi XKHOperator ctermfg=3
+
+" 我写的：end
 
 "vim: sw=4
