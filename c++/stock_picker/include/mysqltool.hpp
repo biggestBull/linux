@@ -27,8 +27,6 @@ public:
 	~MySQLTool(){
 		mysql_close(&mysql);
 	}
-
-
 };
 
 #endif

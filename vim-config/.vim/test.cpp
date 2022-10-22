@@ -20,6 +20,8 @@ using something;
 
 //g++ main.cpp --std=c++11 -lmysqlclient
 
+a/b
+a*b+1/1
 private 
 public
 
@@ -87,6 +89,14 @@ typeid
 	int a = 123+E;
 	'a'
 	0x123
+
+
+	template<typename T>
+	class ABC{
+		T getSome(T* t){
+			
+		}
+	}
 	013
 	new
 	this

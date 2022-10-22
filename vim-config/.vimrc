@@ -327,6 +327,8 @@ se nu
  
 " 用鼠标进行粘贴时也会被下列这些影响，此时，可以输入 :set paste ，完毕后，可以执行 :set nopaste
 ""
+
+" 使用 :h key-notation 以查看键名表
 nnoremap <silent> <F12> :A<cr>
 
 inoremap ( ()<ESC>i
@@ -334,6 +336,8 @@ inoremap {<CR> {<CR>}<LEFT><CR><UP><TAB>
 inoremap [ []<ESC>i
 inoremap " ""<ESC>i
 inoremap ' ''<ESC>i
+inoremap = <SPACE>=<SPACE>
+inoremap , ,<SPACE>
 
 " go [vim 版本太低了，不行]
 " call plug#begin()

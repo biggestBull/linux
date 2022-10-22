@@ -22,8 +22,7 @@ endif
 let g:colors_name="cppcolor"
 
 " 设置背景色
-" hi Normal ctermfg=231 ctermbg=236 cterm=NONE
-hi Normal	guifg=White guibg=grey20
+hi Normal ctermfg=231 ctermbg=236 cterm=NONE
 
 " 注释
 hi Comment ctermfg=61
@@ -44,7 +43,7 @@ hi cFormat ctermfg=brown
 " 预处理
 hi cPreProc ctermfg=86
 hi cDefine ctermfg=159
-hi PreCondit ctermfg=lightblue
+hi PreCondit ctermfg=56
 
 hi cStructure ctermfg=178
 
