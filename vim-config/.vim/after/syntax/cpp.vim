@@ -57,7 +57,7 @@ if exists("c_autodoc")
 endif
 
 " 我写的（必须写在这里，不然注释符号会被被乘除给覆盖掉）
-syn match	 SSOperator	/[+\-\*\/&|^~]\|\(>>\)\|\(<<\)/ 
+syn match	 SSOperator	/[+\-\*\/&|^~]/ 
 
 " A bunch of useful C keywords
 syn keyword	cStatement	goto break return continue asm
@@ -2896,8 +2896,9 @@ endif
 
 syn match	 FZOperator /=/
 syn match	 GXOperator	/[><]/ 
+syn match	 SSOperator	/\(>>\)\|\(<<\)/ 
 syn match	 LJOperator	/!/   
-syn match	 GXOperator	/\(!=\)a\|\(==\)\|\(>=\)\|\(<=\)/ 
+syn match	 GXOperator	/\(!=\)\|\(==\)\|\(>=\)\|\(<=\)/ 
 syn match	 LJOperator	/\(||\)\|\(&&\)/   
 syn match	 DKHOperator	/[{}]/   
 syn match	 ZKHOperator	/\[\|\]/

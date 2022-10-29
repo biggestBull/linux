@@ -329,13 +329,28 @@ se nu
 ""
 
 " 使用 :h key-notation 以查看键名表
+" 使用ESC+i是为了让光标回到前一个字符的位置
+" 使用如()\(这种方式, vim会进行短暂的停顿以等待用户输入下一个字符
+
 nnoremap <silent> <F12> :A<cr>
 
-inoremap ( ()<ESC>i
 inoremap {<CR> {<CR>}<LEFT><CR><UP><TAB>
+inoremap (<RIGHT> (
+inoremap () ()
+inoremap ( ()<ESC>i
+inoremap [<RIGHT> [
+inoremap [] []
 inoremap [ []<ESC>i
+inoremap "<RIGHT> "
+inoremap "" ""
 inoremap " ""<ESC>i
+inoremap '<RIGHT> '
+inoremap '' ''
 inoremap ' ''<ESC>i
+inoremap == <SPACE>==<SPACE>
+inoremap != <SPACE>!=<SPACE>
+inoremap >= <SPACE>>=<SPACE>
+inoremap <= <SPACE><=<SPACE>
 inoremap = <SPACE>=<SPACE>
 inoremap , ,<SPACE>
 
