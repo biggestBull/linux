@@ -335,22 +335,44 @@ se nu
 nnoremap <silent> <F12> :A<cr>
 
 inoremap {<CR> {<CR>}<LEFT><CR><UP><TAB>
+
+inoremap \( \(
 inoremap (<RIGHT> (
 inoremap () ()
 inoremap ( ()<ESC>i
+
+inoremap \[ \[
 inoremap [<RIGHT> [
 inoremap [] []
 inoremap [ []<ESC>i
+
+inoremap \" \"
 inoremap "<RIGHT> "
 inoremap "" ""
 inoremap " ""<ESC>i
+
+inoremap \' \'
 inoremap '<RIGHT> '
 inoremap '' ''
 inoremap ' ''<ESC>i
+
 inoremap == <SPACE>==<SPACE>
 inoremap != <SPACE>!=<SPACE>
 inoremap >= <SPACE>>=<SPACE>
 inoremap <= <SPACE><=<SPACE>
+
+inoremap += <SPACE>+=<SPACE>
+inoremap -= <SPACE>-=<SPACE>
+inoremap *= <SPACE>*=<SPACE>
+inoremap /= <SPACE>/=<SPACE>
+inoremap %= <SPACE>%=<SPACE>
+
+inoremap >>= <SPACE>>>=<SPACE>
+inoremap <<= <SPACE><<=<SPACE>
+inoremap &= <SPACE>&=<SPACE>
+inoremap <Bar>= <SPACE><Bar>=<SPACE>
+inoremap ^= <SPACE>^=<SPACE>
+
 inoremap = <SPACE>=<SPACE>
 inoremap , ,<SPACE>
 
