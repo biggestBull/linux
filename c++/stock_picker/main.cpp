@@ -64,7 +64,11 @@ main(int argc,char *argv[]){
 	}else{
 		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd\n",argv[0]);
 		auto spider = SpiderStocksOverview();  
-		spider.getAllStocks().getRank();
+		spider.getAllStocks()
+			.getRank()
+			.getSectors()
+			.getTransactions()
+		;
 	}
 
 	curl_global_cleanup();

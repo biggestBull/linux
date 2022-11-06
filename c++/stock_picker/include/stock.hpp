@@ -4,14 +4,14 @@
 #include<vector>
 #include<string.h>
 
-#define MAX_LENGTH_STOCK_ATTR_CONCEPT 28
-
 struct StockHistoryTransaction{
 	//top 10
 	int price;
 	int turnover;
+	int action_time;
+	int affect; 
 
-	StockHistoryTransaction(int price, int turnover):price(price), turnover(turnover){}
+	StockHistoryTransaction(int price, int turnover, int action_time, int affect):price(price), turnover(turnover), action_time(action_time), affect(affect){}
 };
 
 struct StockHistoryOverview{
@@ -36,26 +36,24 @@ struct StockHistoryOverview{
 	StockHistoryOverview& setTurnoverRate(int turnover_rate){this->turnover_rate = turnover_rate;return *this;}
 	StockHistoryOverview& setTurnoverSum(int turnover_sum){this->turnover_sum = turnover_sum;return *this;}
 	StockHistoryOverview& setChangePercent(int change_percent){this->change_percent = change_percent;return *this;}
-	StockHistoryOverview& addTransaction(int price, int turnover){this->transactions.push_back(StockHistoryTransaction(price, turnover));return *this;}
+	//StockHistoryOverview& addTransaction(int price, int turnover){this->transactions.push_back(StockHistoryTransaction(price, turnover));return *this;}
 	StockHistoryOverview& setDate(const char date[12]){strncpy(this->date, date, 12);return *this;}
 };
 
 struct Stock{
-private:
-	int departments_index;
 public:
 	int pe;
 	long market_value;
 	long traded_market_value;
 	std::string name;
-	int departments[MAX_LENGTH_STOCK_ATTR_CONCEPT];
+	std::vector<std::string> sectors;
 	StockHistoryOverview history_attr;
 
 	Stock& setPe(int pe){this->pe = pe;return *this;}
 	Stock& setMarketValue(long market_value){this->market_value = market_value;return *this;}
 	Stock& setTradedMarketValue(long traded_market_value){this->traded_market_value = traded_market_value;return *this;}
 	Stock& setName(const std::string name){this->name = name;return *this;}
-	Stock& addDp(int dp){this->departments[this->departments_index++] = dp;return *this;}
+	Stock& addSector(std::string sector){this->sectors.push_back(sector);return *this;}
 
 	StockHistoryOverview& getHistoryAttr(){return this->history_attr;}
 };
