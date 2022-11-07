@@ -67,6 +67,8 @@ protected:
 	}
 	
 	int getWebContent(const char* url,uint (*_writeCb)(char* ,uint ,uint ,char*), void* out_data, int post_req = 0, struct curl_slist * headers  =  NULL, const char *data = ""){
+		curl_easy_reset(_curl);
+
 		curl_easy_setopt(_curl, CURLOPT_URL, url);
 		
 		if(post_req){
@@ -79,10 +81,6 @@ protected:
 		curl_easy_setopt(_curl, CURLOPT_WRITEDATA, out_data);
 		curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, _writeCb);
 		return curl_easy_perform(_curl);
-	}
-
-	void resetCurlHeader(){
-		curl_easy_reset(_curl);
 	}
 };
 

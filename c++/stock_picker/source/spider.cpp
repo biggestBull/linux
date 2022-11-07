@@ -207,8 +207,6 @@ SpiderStocksOverview& SpiderStocksOverview::getSectors(){
 	char *_temp = nullptr;
 	findSpecContent(_temp, _temp, _temp, 1);
 		
-	resetCurlHeader();
-
 	for(auto iter = this->stocks.rbegin(); iter != this->stocks.rend(); iter++){
 		std::string url = base_url + std::string(iter->first[0] == '0'?"SZ":"SH") + std::string(iter->first);
 
@@ -225,8 +223,6 @@ SpiderStocksOverview& SpiderStocksOverview::getRank(){
 	char *_temp = nullptr;
 	findSpecContent(_temp, _temp, _temp, 1);
 		
-	resetCurlHeader();
-
 	struct curl_slist* headers = NULL;
 	headers = curl_slist_append(headers, "Content-Type:application/json;charset=UTF-8");
 
@@ -251,9 +247,8 @@ SpiderStocksOverview& SpiderStocksOverview::getAllStocks(){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=21&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=27&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
-	resetCurlHeader();
 	auto rs = getWebContent( _BASE_URL _PARAMS _FIELDS 
 		 _STOCK_NAME_KEY ","
 		 _STOCK_CODE_KEY ","
