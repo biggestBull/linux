@@ -52,30 +52,30 @@ std::string findSpecContent(const char *before, const char *after, char *&in, in
 	return "";	
 }
 
-uint SpiderStocksOverview::_getTransactions(char *in, uint size, uint nmemb, char *out_interface){
+uint stockpicker::SpiderStocksOverview::_parseTransactions(char *in, uint size, uint nmemb, char *out_interface){
 	const char *before = "\"details\":";
 	const char *after = "}";
 	
-	auto* spiderStocksOverview = reinterpret_cast<SpiderStocksOverview*>(out_interface);
+	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
 	std::string ta_str = findSpecContent(before, after, in);
 	if(ta_str.length()){
-		spiderStocksOverview->addTransaction(ta_str);
+		spiderStocksOverview->_addTransaction(ta_str);
 	}
 
 	uint r = size * nmemb;
 	return r;
 }
 
-uint SpiderStocksOverview::_getSectors(char *in, uint size, uint nmemb, char *out_interface){
+uint stockpicker::SpiderStocksOverview::_parseSectors(char *in, uint size, uint nmemb, char *out_interface){
 	const char *before = "\"BOARD_NAME\":";
 	const char *after = ",";
 
-	auto* spiderStocksOverview = reinterpret_cast<SpiderStocksOverview*>(out_interface);
+	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
 
 	std::string sector_str = findSpecContent(before, after, in);
 	while(*in){
 		if(sector_str.length()){
-			spiderStocksOverview->addSector(sector_str);
+			spiderStocksOverview->_addSector(sector_str);
 			sector_str = findSpecContent(before, after, in);
 		}
 	}
@@ -84,20 +84,20 @@ uint SpiderStocksOverview::_getSectors(char *in, uint size, uint nmemb, char *ou
 	return r;
 }
 
-uint SpiderStocksOverview::_getRank(char *in, uint size, uint nmemb, char *out_interface){
+uint stockpicker::SpiderStocksOverview::_parseRank(char *in, uint size, uint nmemb, char *out_interface){
 	const char *before = "\"rank\":";
 	const char *after = ",";
 	
-	auto* spiderStocksOverview = reinterpret_cast<SpiderStocksOverview*>(out_interface);
+	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
 	std::string rank_str = findSpecContent(before, after, in);
 	if(rank_str.length()){
-		spiderStocksOverview->addRank(rank_str);
+		spiderStocksOverview->_addRank(rank_str);
 	}
 	uint r = size * nmemb;
 	return r;
 }
 
-uint SpiderStocksOverview::_getStockBasicInfo(char *in, uint size, uint nmemb, char *out_interface){
+uint stockpicker::SpiderStocksOverview::_parseStockBasicInfo(char *in, uint size, uint nmemb, char *out_interface){
 	enum struct JsonState{
 		BeforeStart_1,
 		BeforeStart_2,
@@ -114,7 +114,7 @@ uint SpiderStocksOverview::_getStockBasicInfo(char *in, uint size, uint nmemb, c
 	static int key_index,value_index;
 	static int find_item = 0;
 	
-	auto* spiderStocksOverview = reinterpret_cast<SpiderStocksOverview*>(out_interface);
+	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
 	while(*in){
 		switch(state){
 			case JsonState::BeforeStart_1:
@@ -163,12 +163,12 @@ uint SpiderStocksOverview::_getStockBasicInfo(char *in, uint size, uint nmemb, c
 		if(find_item){
 			entries[key] = value;
 			if(*in == '}'){
-				for(const auto* stock_code:spiderStocksOverview->stock_filter ){
+				for(const auto* stock_code:spiderStocksOverview->_stock_filter ){
 					auto* _code_ = entries[_STOCK_CODE_KEY].c_str();
 					int i = 0;
 					while(stock_code[i]) if(stock_code[i] == _code_[i]) i += !!stock_code[i];else break;
 						if(!stock_code[i]){
-							spiderStocksOverview->addStock(entries);
+							spiderStocksOverview->_addStock(entries);
 							break;
 						}
 					}
@@ -183,73 +183,70 @@ uint SpiderStocksOverview::_getStockBasicInfo(char *in, uint size, uint nmemb, c
 
 /* -----------------------------------  解析器 End -------------------------------------  */
 
-SpiderStocksOverview& SpiderStocksOverview::getTransactions(){
+stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getTransactions(){
 	// XXX 也省略了一些参数，不知道次数多了会不会就会被判定为爬虫
 	// f51-f55: 成交时间，成交价，成交量，多少单（集合竞价时可能会为0），主卖&主买(1主卖2主买)
 	const char *base_url = "https://push2.eastmoney.com/api/qt/stock/details/get?fields1=f1&fields2=f51,f52,f53,f54,f55&pos=-1000000&iscca=1&secid=";
 
+	//清除状态
 	char *_temp = nullptr;
 	findSpecContent(_temp, _temp, _temp, 1);
 
-	for(auto iter = this->stocks.rbegin(); iter != this->stocks.rend(); iter++){
-		std::string url = base_url + std::string(iter->first[0] == '0'?"0.":"1.") + std::string(iter->first);
+	std::string url = base_url + std::string(_cur_stock_code[0] == '0'?"0.":"1.") + _cur_stock_code;
 
-		this->cur_stock_code = iter->first;
-		auto rs = getWebContent( url.c_str(), _getTransactions, this); 
-		randomSleep(1, 3); //[min, max]
-	}
+	auto rs = getWebContent( url.c_str(), _parseTransactions, this); 
+	randomSleep(1, 3); //[min, max]
+					   
 	return *this;
 }
 
-SpiderStocksOverview& SpiderStocksOverview::getSectors(){
+stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getSectors(){
 	const char *base_url = "http://emweb.securities.eastmoney.com/PC_HSF10/CoreConception/PageAjax?code=";
 
+	//清除状态
 	char *_temp = nullptr;
 	findSpecContent(_temp, _temp, _temp, 1);
 		
-	for(auto iter = this->stocks.rbegin(); iter != this->stocks.rend(); iter++){
-		std::string url = base_url + std::string(iter->first[0] == '0'?"SZ":"SH") + std::string(iter->first);
+	std::string url = base_url + std::string(_cur_stock_code[0] == '0'?"SZ":"SH") + _cur_stock_code;
 
-		this->cur_stock_code = iter->first;
-		auto rs = getWebContent( url.c_str(), _getSectors, this); 
-		randomSleep(1, 3); //[min, max]
-	}
+	auto rs = getWebContent( url.c_str(), _parseSectors, this); 
+	randomSleep(1, 3); //[min, max]
+	
 	return *this;
 }
 	
-SpiderStocksOverview& SpiderStocksOverview::getRank(){
+stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getRank(){
 	const char *base_url = "https://emappdata.eastmoney.com/stockrank/getCurrentLatest";
 
+	//清除状态
 	char *_temp = nullptr;
 	findSpecContent(_temp, _temp, _temp, 1);
 		
 	struct curl_slist* headers = NULL;
 	headers = curl_slist_append(headers, "Content-Type:application/json;charset=UTF-8");
 
-	for(auto iter = this->stocks.rbegin(); iter != this->stocks.rend(); iter++){
-		// XXX 发现除了srcSecurityCode, 其它的居然可以不填，不知道次数多了会不会就会被判定为爬虫
-		std::string params = "{"
-			 "\"appId\": \"\", "
-			 "\"globalId\": \"\","
-			 "\"marketType\": \"\","
-			 "\"srcSecurityCode\":\"" + std::string(iter->first[0] == '0'?"SZ":"SH") + std::string(iter->first) + "\""
-			"}"
-		;
-		this->cur_stock_code = iter->first;
-		auto rs = getWebContent( base_url, _getRank, this, 1, headers, params.c_str()); 
-		randomSleep(1, 3); //[min, max]
-	}
+	// XXX 发现除了srcSecurityCode, 其它的居然可以不填，不知道次数多了会不会就会被判定为爬虫
+	std::string params = "{"
+		 "\"appId\": \"\", "
+		 "\"globalId\": \"\","
+		 "\"marketType\": \"\","
+		 "\"srcSecurityCode\":\"" + std::string(_cur_stock_code[0] == '0'?"SZ":"SH") + _cur_stock_code + "\""
+		"}"
+	;
+	auto rs = getWebContent( base_url, _parseRank, this, 1, headers, params.c_str()); 
+	randomSleep(1, 3); //[min, max]
 
 	return *this;	
 }
 
-SpiderStocksOverview& SpiderStocksOverview::getAllStocks(){
+int stockpicker::SpiderStocksOverview::getAllStocks(){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=27&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=8&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
-	auto rs = getWebContent( _BASE_URL _PARAMS _FIELDS 
+	//获得基本信息
+	int rs = getWebContent( _BASE_URL _PARAMS _FIELDS 
 		 _STOCK_NAME_KEY ","
 		 _STOCK_CODE_KEY ","
 		 _STOCK_NEWST_PRICE_KEY ","
@@ -264,18 +261,25 @@ SpiderStocksOverview& SpiderStocksOverview::getAllStocks(){
 		 _STOCK_MARKET_VALUE_KEY ","
 		 _STOCK_TRADED_MARKET_VALUE_KEY 
 		"&_=1666529170575"
-		,_getStockBasicInfo, this);
+		,_parseStockBasicInfo, this);
 
-	return *this;	
+
+	//获得其它信息
+	for(auto iter = _stocks.rbegin(); iter != _stocks.rend(); iter++){
+		_cur_stock_code = iter->first;
+		_getRank()._getSectors()._getTransactions();
+	}
+
+	return rs;	
 }
 
-void SpiderStocksOverview::addStock(std::map<std::string, std::string> &stock_attr){
-	this->stocks[stock_attr[_STOCK_CODE_KEY]] = Stock().setName(stock_attr[_STOCK_NAME_KEY])
+void stockpicker::SpiderStocksOverview::_addStock(std::map<std::string, std::string> &stock_attr){
+	_stocks[stock_attr[_STOCK_CODE_KEY]] = Stock().setName(stock_attr[_STOCK_NAME_KEY])
 									.setPe(float_str_to_int(stock_attr[_STOCK_PE_KEY]))
 									.setMarketValue(std::stol(stock_attr[_STOCK_MARKET_VALUE_KEY]))
 									.setTradedMarketValue(std::stol(stock_attr[_STOCK_TRADED_MARKET_VALUE_KEY]))
 								;
-	this->stocks[stock_attr[_STOCK_CODE_KEY]].getHistoryAttr().setPriceStart(float_str_to_int(stock_attr[_STOCK_START_PRICE_KEY]))
+	_stocks[stock_attr[_STOCK_CODE_KEY]].getHistoryAttr().setPriceStart(float_str_to_int(stock_attr[_STOCK_START_PRICE_KEY]))
 										.setPriceNewst(float_str_to_int(stock_attr[_STOCK_NEWST_PRICE_KEY]))
 										.setPriceHigest(float_str_to_int(stock_attr[_STOCK_HIGEST_PRICE_KEY]))
 										.setPriceLowest(float_str_to_int(stock_attr[_STOCK_LOWST_PRICE_KEY]))
@@ -287,17 +291,18 @@ void SpiderStocksOverview::addStock(std::map<std::string, std::string> &stock_at
 								;
 }
 
-void SpiderStocksOverview::addRank(std::string rank){
-	this->stocks[this->cur_stock_code].getHistoryAttr().setRank(std::stoi(rank));
-	std::cout<<this->cur_stock_code<<", "<<rank<<std::endl;
+void stockpicker::SpiderStocksOverview::_addRank(std::string rank){
+	_stocks[_cur_stock_code].getHistoryAttr().setRank(std::stoi(rank));
+	std::cout<<_cur_stock_code<<", "<<rank<<std::endl;
 }
 
-void SpiderStocksOverview::addSector(std::string sector){
-	this->stocks[this->cur_stock_code].addSector(sector);
-	std::cout<<this->cur_stock_code<<", "<<sector<<std::endl;
+void stockpicker::SpiderStocksOverview::_addSector(std::string sector){
+	_stocks[_cur_stock_code].addSector(sector);
+	std::cout<<_cur_stock_code<<", "<<sector<<std::endl;
 }
 
-void SpiderStocksOverview::addTransaction(std::string transaction){
-	std::cout<<this->cur_stock_code<<", "<<transaction<<std::endl;
+void stockpicker::SpiderStocksOverview::_addTransaction(std::string transactions){
+	_stocks[_cur_stock_code].getHistoryAttr().setTransactions(transactions);
+	std::cout<<_cur_stock_code<<", "<<transactions<<std::endl;
 }
 

@@ -59,18 +59,14 @@ main(int argc,char *argv[]){
 			}
 		}
 		if(url && port && user && pwd){
-			MySQLTool mysqltool(url,port,user,pwd);
+			stockpicker::MySQLTool mysqltool(url,port,user,pwd);
+			
+			auto spider = stockpicker::SpiderStocksOverview(&mysqltool);  
+			spider.getAllStocks();
+		
 		}
 	}else{
 		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd\n",argv[0]);
-		/*
-		auto spider = SpiderStocksOverview();  
-		spider.getAllStocks()
-			.getRank()
-			.getSectors()
-			.getTransactions()
-		;
-		*/
 	}
 
 	curl_global_cleanup();
