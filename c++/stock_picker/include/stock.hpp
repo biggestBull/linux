@@ -1,5 +1,6 @@
-#ifndef _STOCK_CLASS
-#define _STOCK_CLASS
+#ifndef _STOCK_PICKER_STOCK_H
+
+#define _STOCK_PICKER_STOCK_H
 
 #include<vector>
 #include<string.h>
@@ -16,7 +17,7 @@ namespace stockpicker{
 		int turnover_rate;
 		long turnover_sum;
 		int change_percent;
-		std::string transactions;
+		std::string *transactions;
 		char date[12]; //YYYYMMDD
 	
 		StockHistoryOverview& setRank(int rank){this->rank = rank;return *this;}
@@ -28,7 +29,7 @@ namespace stockpicker{
 		StockHistoryOverview& setTurnoverRate(int turnover_rate){this->turnover_rate = turnover_rate;return *this;}
 		StockHistoryOverview& setTurnoverSum(int turnover_sum){this->turnover_sum = turnover_sum;return *this;}
 		StockHistoryOverview& setChangePercent(int change_percent){this->change_percent = change_percent;return *this;}
-		StockHistoryOverview& setTransactions(std::string transactions){this->transactions = transactions;return *this;}
+		StockHistoryOverview& setTransactions(std::string *transactions){this->transactions = transactions;return *this;}
 		StockHistoryOverview& setDate(const char date[12]){strncpy(this->date, date, 12);return *this;}
 	};
 	

@@ -1,7 +1,7 @@
 
-#ifndef MYSQLTOOL_H
+#ifndef _STOCK_PICKER_MYSQLTOOL_H
 
-#define MYSQLTOOL_H
+#define _STOCK_PICKER_MYSQLTOOL_H
 
 #include<stdio.h>
 #include<mysql/mysql.h>
@@ -51,7 +51,7 @@ namespace stockpicker{
 		}
 
 		int insertStockInfo(Stock &stock){
-			printf("%d", stock.history_attr.rank);
+			printf("%d\n", stock.history_attr.rank);
 			return 0;
 		}
 	};

@@ -1,5 +1,5 @@
-#ifndef _SPIDER_CLASS_
-#define _SPIDER_CLASS_
+#ifndef _STOCK_PICKER_SPIDER_H
+#define _STOCK_PICKER_SPIDER_H
 
 #include<curl/curl.h>
 #include<iostream>
@@ -11,6 +11,7 @@
 
 #include"stock.hpp"
 #include"mysqltool.hpp"
+#include"log.hpp"
 
 #define CURL_MAX_ERROR_BUF_LENGTH 1000
 
@@ -48,9 +49,11 @@ namespace stockpicker{
 	private:
 		CURL* _curl;
 		char _curl_error_buf[CURL_MAX_ERROR_BUF_LENGTH];
-	
+
 	protected:
 		std::string date;
+
+		SimpleLog &simpleLog = SimpleLog::getInstance();
 	
 		Spider(){
 			_curl = curl_easy_init();	
@@ -94,6 +97,9 @@ namespace stockpicker{
 		const char *_stock_filter[7] = {"0", "600", "601","602","603","604","605"};
 		std::map<std::string, Stock> _stocks;
 		std::string _cur_stock_code;
+
+		//内存扛不住, 只能出此下策
+		std::string _transactions;
 	
 		static uint _parseTransactions(char *in, uint size, uint nmemb, char *out_interface);
 		static uint _parseSectors(char *in, uint size, uint nmemb, char *out_interface);

@@ -243,7 +243,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=8&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=18&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
 	//获得基本信息
 	int rs = getWebContent( _BASE_URL _PARAMS _FIELDS 
@@ -264,10 +264,13 @@ int stockpicker::SpiderStocksOverview::getAllStocks(){
 		,_parseStockBasicInfo, this);
 
 
+	simpleLog.info("Get ALL Stocks Basic Info", "SIZE: " + std::to_string(_stocks.size()) );
 	//获得其它信息
 	for(auto iter = _stocks.rbegin(); iter != _stocks.rend(); iter++){
 		_cur_stock_code = iter->first;
 		_getRank()._getSectors()._getTransactions();
+
+		_mysqltool->insertStockInfo(_stocks[_cur_stock_code]);
 	}
 
 	return rs;	
@@ -293,16 +296,14 @@ void stockpicker::SpiderStocksOverview::_addStock(std::map<std::string, std::str
 
 void stockpicker::SpiderStocksOverview::_addRank(std::string rank){
 	_stocks[_cur_stock_code].getHistoryAttr().setRank(std::stoi(rank));
-	std::cout<<_cur_stock_code<<", "<<rank<<std::endl;
 }
 
 void stockpicker::SpiderStocksOverview::_addSector(std::string sector){
 	_stocks[_cur_stock_code].addSector(sector);
-	std::cout<<_cur_stock_code<<", "<<sector<<std::endl;
 }
 
 void stockpicker::SpiderStocksOverview::_addTransaction(std::string transactions){
-	_stocks[_cur_stock_code].getHistoryAttr().setTransactions(transactions);
-	std::cout<<_cur_stock_code<<", "<<transactions<<std::endl;
+	this->_transactions = transactions;
+	_stocks[_cur_stock_code].getHistoryAttr().setTransactions(&this->_transactions);
 }
 
