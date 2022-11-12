@@ -135,22 +135,22 @@ uint stockpicker::SpiderStocksOverview::_parseStockBasicInfo(char *in, uint size
 					key_index = 0;
 				}
 				break;
-				case JsonState::InKey:
+			case JsonState::InKey:
 				if(*in =='"'){ 
 					state = JsonState::LookForValue;
 				}else{
 					key[key_index++] = *in;
 					key[key_index] = '\0';
 				}
-			break;
-				case JsonState::LookForValue:
+				break;
+			case JsonState::LookForValue:
 				if(*in ==':'){ 
 					state = JsonState::InValue;
 					value_index = 0;
 				}
 				break;
 			case JsonState::InValue:
-					if(*in == ',' || *in == '}'){ 
+				if(*in == ',' || *in == '}'){ 
 					find_item = 1;
 					state = JsonState::LookForKey;
 				}else if(*in != '\"'){
@@ -196,6 +196,7 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getTransa
 
 	auto rs = getWebContent( url.c_str(), _parseTransactions, this); 
 	randomSleep(1, 3); //[min, max]
+	simpleLog.info("Get Stock Transactions", _cur_stock_code, !_transactions.empty());
 					   
 	return *this;
 }
@@ -211,6 +212,7 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getSector
 
 	auto rs = getWebContent( url.c_str(), _parseSectors, this); 
 	randomSleep(1, 3); //[min, max]
+	simpleLog.info("Get Stock Sectors", _cur_stock_code, _stocks[_cur_stock_code].sectors.size() > 0, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()));
 	
 	return *this;
 }
@@ -235,16 +237,19 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getRank()
 	;
 	auto rs = getWebContent( base_url, _parseRank, this, 1, headers, params.c_str()); 
 	randomSleep(1, 3); //[min, max]
+	simpleLog.info("Get Stock Rank", _cur_stock_code, _stocks[_cur_stock_code].getHistoryAttr().rank > 0, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank));
 
 	return *this;	
 }
 
-int stockpicker::SpiderStocksOverview::getAllStocks(){
+int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
 	#define _PARAMS "&pn=1&pz=18&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
+	_cur_stock_code = spec_stock;
+
 	//获得基本信息
 	int rs = getWebContent( _BASE_URL _PARAMS _FIELDS 
 		 _STOCK_NAME_KEY ","
@@ -264,19 +269,23 @@ int stockpicker::SpiderStocksOverview::getAllStocks(){
 		,_parseStockBasicInfo, this);
 
 
-	simpleLog.info("Get ALL Stocks Basic Info", "SIZE: " + std::to_string(_stocks.size()) );
+	simpleLog.console().info("Get ALL Stocks Basic Info", "SpiderStocksOverview", _stocks.size() > 0, "SIZE: " + std::to_string(_stocks.size()) );
 	//获得其它信息
 	for(auto iter = _stocks.rbegin(); iter != _stocks.rend(); iter++){
 		_cur_stock_code = iter->first;
 		_getRank()._getSectors()._getTransactions();
 
-		_mysqltool->insertStockInfo(_stocks[_cur_stock_code]);
+		_mysqltool->updateStockInfo(_stocks[_cur_stock_code]);
+
+		_transactions.clear();
 	}
 
 	return rs;	
 }
 
 void stockpicker::SpiderStocksOverview::_addStock(std::map<std::string, std::string> &stock_attr){
+	if(!_cur_stock_code.empty() && stock_attr[_STOCK_CODE_KEY] != _cur_stock_code) return;
+
 	_stocks[stock_attr[_STOCK_CODE_KEY]] = Stock().setName(stock_attr[_STOCK_NAME_KEY])
 									.setPe(float_str_to_int(stock_attr[_STOCK_PE_KEY]))
 									.setMarketValue(std::stol(stock_attr[_STOCK_MARKET_VALUE_KEY]))

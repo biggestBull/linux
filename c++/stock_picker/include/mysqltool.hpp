@@ -3,16 +3,17 @@
 
 #define _STOCK_PICKER_MYSQLTOOL_H
 
-#include<stdio.h>
 #include<mysql/mysql.h>
 
 #include"stock.hpp"
+#include"log.hpp"
 
 namespace stockpicker{
 
 	class MySQLTool{
 	private:
 		MYSQL _mysql;
+		SimpleLog& simpleLog = SimpleLog::getInstance();
 
 		#include"mysql.inc"
 
@@ -21,7 +22,7 @@ namespace stockpicker{
 			uint tables_num = sizeof(_tables)/sizeof(*_tables);
 			for(int i = 0;i != tables_num;i++){
 				if((status = mysql_query(&_mysql,_tables[i]))){
-					printf("create table failed: [ %d ]!", i );	
+					simpleLog.error("Create Table", std::to_string(i), "Failed", std::to_string(status));
 					exit(status);	
 				}
 			}
@@ -32,13 +33,13 @@ namespace stockpicker{
 		MySQLTool(const char *url,int port,const char *user,const char *pwd){
 			mysql_init(&_mysql);
 			if(!mysql_real_connect(&_mysql,url,user,pwd,_db_name,port,0,0)){
-				printf("connect mysql failed\n");	
+				simpleLog.error("Connect Mysql", std::string(url) + ":" + std::to_string(port), "Failed");
 				exit(1);	
 			}
 	
 			int status = 0;
 			if((status = mysql_select_db(&_mysql,_db_name)) != 0){
-				printf("select db failed!\n");	
+				simpleLog.error("Selecy Database", std::string(_db_name), "Failed", std::to_string(status));
 				exit(status);	
 			}
 			
@@ -50,10 +51,7 @@ namespace stockpicker{
 			mysql_close(&_mysql);
 		}
 
-		int insertStockInfo(Stock &stock){
-			printf("%d\n", stock.history_attr.rank);
-			return 0;
-		}
+		int updateStockInfo(Stock&);
 	};
 }
 

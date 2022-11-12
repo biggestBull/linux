@@ -62,7 +62,7 @@ main(int argc,char *argv[]){
 			stockpicker::MySQLTool mysqltool(url,port,user,pwd);
 			
 			auto spider = stockpicker::SpiderStocksOverview(&mysqltool);  
-			spider.getAllStocks();
+			spider.getAllStocks("600243");
 		
 		}
 	}else{

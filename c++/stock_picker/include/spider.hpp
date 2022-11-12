@@ -4,9 +4,9 @@
 #include<curl/curl.h>
 #include<iostream>
 #include<map>
-#include <sstream>
-#include <time.h>
-#include <unistd.h>
+#include<sstream>
+#include<time.h>
+#include<unistd.h>
 #include<stdlib.h>
 
 #include"stock.hpp"
@@ -118,7 +118,7 @@ namespace stockpicker{
 	public:
 		SpiderStocksOverview(MySQLTool *mysqltool):_mysqltool(mysqltool){}
 
-		int getAllStocks();
+		int getAllStocks(std::string spec_stock = "");
 	};
 }
 

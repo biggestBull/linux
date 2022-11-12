@@ -3,6 +3,7 @@
 #define _STOCK_PICKER_STOCK_H
 
 #include<vector>
+#include<string>
 #include<string.h>
 	
 namespace stockpicker{
