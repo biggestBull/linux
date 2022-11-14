@@ -3,6 +3,8 @@
 
 #define _STOCK_PICKER_MYSQLTOOL_H
 
+#define _MYSQL_TOOL_ERR_BUF 1000
+
 #include<mysql/mysql.h>
 
 #include"stock.hpp"
@@ -13,6 +15,8 @@ namespace stockpicker{
 	class MySQLTool{
 	private:
 		MYSQL _mysql;
+		char _err_buf[_MYSQL_TOOL_ERR_BUF];
+
 		SimpleLog& simpleLog = SimpleLog::getInstance();
 
 		#include"mysql.inc"
@@ -33,7 +37,8 @@ namespace stockpicker{
 		MySQLTool(const char *url,int port,const char *user,const char *pwd){
 			mysql_init(&_mysql);
 			if(!mysql_real_connect(&_mysql,url,user,pwd,_db_name,port,0,0)){
-				simpleLog.error("Connect Mysql", std::string(url) + ":" + std::to_string(port), "Failed");
+				snprintf(_err_buf, _MYSQL_TOOL_ERR_BUF, "%s", mysql_error(&_mysql));
+				simpleLog.error("Connect Mysql", std::string(url) + ":" + std::to_string(port), "Failed", _err_buf);
 				exit(1);	
 			}
 	

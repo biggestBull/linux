@@ -17,9 +17,45 @@ namespace stockpicker{
 		uint _log_maxium_size = 1024 * 1024 * 3;
 		std::ofstream _log_file;		
 
-		bool _console = false;
+		std::string _record_date;
+		uint _info_cnt;
+		uint _warn_cnt;
+		uint _error_cnt;
+		uint _fatal_cnt;
 
-		SimpleLog(){
+		class Console{
+			friend class SimpleLog;
+		private:
+			SimpleLog &_simple_log;
+			Console(SimpleLog& simple_log):_simple_log(simple_log){}
+
+		public:
+			template<typename ...Ts>
+			void info(Ts ...args){
+				_simple_log.info(std::forward<Ts>(args)..., true);
+			}	
+
+			template<typename ...Ts>
+			void warn(Ts ...args){
+				_simple_log.warn(std::forward<Ts>(args)..., true);
+			}	
+
+			template<typename ...Ts>
+			void error(Ts ...args){
+				_simple_log.error(std::forward<Ts>(args)..., true);
+			}	
+
+			template<typename ...Ts>
+			void fatal(Ts ...args){
+				_simple_log.fatal(std::forward<Ts>(args)..., true);
+			}	
+		};
+
+	public:
+		Console console;
+
+	private:
+		SimpleLog():console(*this), _record_date(_now()){
 			_openLogFile();
 		}
 
@@ -34,10 +70,9 @@ namespace stockpicker{
 			return tmp;
 		}
 
-		void _write(std::string level, std::string event, std::string who, std::string result, std::string reason){
+		void _write(std::string level, std::string event, std::string who, std::string result, std::string reason, bool console){
 			std::string output_str(" [ " + _now() + " ] " + level + " <> " + event + " <> Mr. " + who + " <> [ " + result + " ] <> " + reason);
-			if(_console){
-				_console = false;
+			if(console){
 				std::cout<<output_str<<std::endl;
 			}
 			_log_file<<output_str<<std::endl;
@@ -81,25 +116,20 @@ namespace stockpicker{
 			_log_file.close();
 		}
 
-		SimpleLog& console(){
-			_console = true;
-			return *this;
-		}
-
-		void info(std::string event, std::string who, bool status = true, std::string reason = ""){
-			_write("INFO", event, who, status?"SUCCESS":"FAILED", reason);
+		void info(std::string event, std::string who, bool status, std::string reason, bool _console = false){
+			_write("INFO", event, who, status?"SUCCESS":"FAILED", reason, _console);
 		}	
 
-		void warn(std::string event, std::string who, std::string result, std::string reason = ""){
-			_write("WARN", event, who, result, reason);
+		void warn(std::string event, std::string who, std::string result, std::string reason, bool _console = false){
+			_write("WARN", event, who, result, reason, _console);
 		}	
 
-		void error(std::string event, std::string who, std::string result, std::string reason = ""){
-			_write("ERROR", event, who, result, reason);
+		void error(std::string event, std::string who, std::string result, std::string reason, bool _console = false){
+			_write("ERROR", event, who, result, reason, _console);
 		}	
 
-		void fatal(std::string event, std::string who, std::string result, std::string reason = ""){
-			_write("FATAL", event, who, result, reason);
+		void fatal(std::string event, std::string who, std::string result, std::string reason, bool _console = false){
+			_write("FATAL", event, who, result, reason, _console);
 		}	
 
 		int changeLogPath(std::string new_filename, std::string new_dir = ""){
@@ -110,6 +140,11 @@ namespace stockpicker{
 				_filedir = new_dir;
 			}
 			return _openLogFile();
+		}
+
+		void clearRecordInfo(){
+			_record_date = _now();
+			_info_cnt = _warn_cnt = _error_cnt = _fatal_cnt = 0;
 		}
 	};
 }
