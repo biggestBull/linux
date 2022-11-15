@@ -5,6 +5,7 @@
 #include<iostream>
 #include<fstream>
 #include<string>
+#include<tuple>
 #include<time.h>
 #include <cstdlib>
 
@@ -18,7 +19,6 @@ namespace stockpicker{
 		std::ofstream _log_file;		
 
 		std::string _record_date;
-		uint _info_cnt;
 		uint _warn_cnt;
 		uint _error_cnt;
 		uint _fatal_cnt;
@@ -121,14 +121,17 @@ namespace stockpicker{
 		}	
 
 		void warn(std::string event, std::string who, std::string result, std::string reason, bool _console = false){
+			_warn_cnt++;
 			_write("WARN", event, who, result, reason, _console);
 		}	
 
 		void error(std::string event, std::string who, std::string result, std::string reason, bool _console = false){
+			_error_cnt++;
 			_write("ERROR", event, who, result, reason, _console);
 		}	
 
 		void fatal(std::string event, std::string who, std::string result, std::string reason, bool _console = false){
+			_fatal_cnt++;
 			_write("FATAL", event, who, result, reason, _console);
 		}	
 
@@ -142,9 +145,13 @@ namespace stockpicker{
 			return _openLogFile();
 		}
 
-		void clearRecordInfo(){
-			_record_date = _now();
-			_info_cnt = _warn_cnt = _error_cnt = _fatal_cnt = 0;
+		std::tuple<std::string, uint, uint, uint> recordInfo(bool reset = false){
+			auto rt = std::make_tuple(_record_date, _warn_cnt, _error_cnt, _fatal_cnt);
+			if(reset){
+				_record_date = _now();
+				_warn_cnt = _error_cnt = _fatal_cnt = 0;
+			}
+			return rt;
 		}
 	};
 }

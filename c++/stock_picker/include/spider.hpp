@@ -48,10 +48,11 @@ namespace stockpicker{
 	class Spider{
 	private:
 		CURL* _curl;
-		char _curl_error_buf[CURL_MAX_ERROR_BUF_LENGTH];
 
 	protected:
 		std::string date;
+		std::string curl_in;
+		char curl_error_buf[CURL_MAX_ERROR_BUF_LENGTH];
 
 		SimpleLog &simpleLog = SimpleLog::getInstance();
 	
@@ -67,7 +68,7 @@ namespace stockpicker{
 	
 		~Spider(){
 			curl_easy_cleanup(_curl);
-			curl_easy_setopt(_curl, CURLOPT_ERRORBUFFER, _curl_error_buf);
+			curl_easy_setopt(_curl, CURLOPT_ERRORBUFFER, curl_error_buf);
 			curl_easy_setopt(_curl, CURLOPT_NOPROGRESS, 1L);
 			curl_easy_setopt(_curl, CURLOPT_VERBOSE, 0L);
 		}

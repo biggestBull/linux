@@ -57,6 +57,8 @@ uint stockpicker::SpiderStocksOverview::_parseTransactions(char *in, uint size, 
 	const char *after = "}";
 	
 	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
+	spiderStocksOverview->curl_in += in;
+
 	std::string ta_str = findSpecContent(before, after, in);
 	if(ta_str.length()){
 		spiderStocksOverview->_addTransaction(ta_str);
@@ -71,6 +73,7 @@ uint stockpicker::SpiderStocksOverview::_parseSectors(char *in, uint size, uint 
 	const char *after = ",";
 
 	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
+	spiderStocksOverview->curl_in += in;
 
 	std::string sector_str = findSpecContent(before, after, in);
 	while(*in){
@@ -89,6 +92,8 @@ uint stockpicker::SpiderStocksOverview::_parseRank(char *in, uint size, uint nme
 	const char *after = ",";
 	
 	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
+	spiderStocksOverview->curl_in += in;
+
 	std::string rank_str = findSpecContent(before, after, in);
 	if(rank_str.length()){
 		spiderStocksOverview->_addRank(rank_str);
@@ -112,10 +117,19 @@ uint stockpicker::SpiderStocksOverview::_parseStockBasicInfo(char *in, uint size
 	static char key[100],value[100];
 	static std::map<std::string, std::string> entries;
 	static int key_index,value_index;
-	static int find_item = 0;
+	static int find_item;
+
+	if(out_interface == nullptr){
+		state = JsonState::BeforeStart_1;
+		key_index = value_index = find_item = 0;
+		entries.clear();
+		return 0;
+	}
 	
 	auto* spiderStocksOverview = reinterpret_cast<stockpicker::SpiderStocksOverview*>(out_interface);
-	while(*in){
+	spiderStocksOverview->curl_in += in;
+
+	while(in && *in){
 		switch(state){
 			case JsonState::BeforeStart_1:
 				if(*in == '['){
@@ -189,15 +203,23 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getTransa
 	const char *base_url = "https://push2.eastmoney.com/api/qt/stock/details/get?fields1=f1&fields2=f51,f52,f53,f54,f55&pos=-1000000&iscca=1&secid=";
 
 	//清除状态
-	char *_temp = nullptr;
-	findSpecContent(_temp, _temp, _temp, 1);
+	curl_in.clear();
+	char *temp = nullptr;
+	findSpecContent(temp, temp, temp, 1);
 
 	std::string url = base_url + std::string(_cur_stock_code[0] == '0'?"0.":"1.") + _cur_stock_code;
 
-	auto rs = getWebContent( url.c_str(), _parseTransactions, this); 
-	randomSleep(1, 3); //[min, max]
-	simpleLog.info("Get Stock Transactions", _cur_stock_code, !_transactions.empty(), "");
-					   
+	int rs = getWebContent( url.c_str(), _parseTransactions, this); 
+	if(rs){
+		simpleLog.error("Get Stock Transactions", _cur_stock_code, std::to_string(rs), curl_error_buf);
+	}else{
+		randomSleep(1, 3); //[min, max]
+		if(!_transactions.empty()){
+			simpleLog.info("Get Stock Transactions", _cur_stock_code, true, "");
+		}else{
+			simpleLog.warn("Get Stock Transactions", _cur_stock_code, "", curl_in);
+		}
+	}				   
 	return *this;
 }
 
@@ -205,15 +227,23 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getSector
 	const char *base_url = "http://emweb.securities.eastmoney.com/PC_HSF10/CoreConception/PageAjax?code=";
 
 	//清除状态
-	char *_temp = nullptr;
-	findSpecContent(_temp, _temp, _temp, 1);
+	curl_in.clear();
+	char *temp = nullptr;
+	findSpecContent(temp, temp, temp, 1);
 		
 	std::string url = base_url + std::string(_cur_stock_code[0] == '0'?"SZ":"SH") + _cur_stock_code;
 
-	auto rs = getWebContent( url.c_str(), _parseSectors, this); 
-	randomSleep(1, 3); //[min, max]
-	simpleLog.info("Get Stock Sectors", _cur_stock_code, _stocks[_cur_stock_code].sectors.size() > 0, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()));
-	
+	int rs = getWebContent( url.c_str(), _parseSectors, this); 
+	if(rs){
+		simpleLog.error("Get Stock Sectors", _cur_stock_code, std::to_string(rs), curl_error_buf);
+	}else{
+		randomSleep(1, 3); //[min, max]
+		if(_stocks[_cur_stock_code].sectors.size() > 0){
+			simpleLog.info("Get Stock Sectors", _cur_stock_code, true, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()));
+		}else{
+			simpleLog.warn("Get Stock Sectors", _cur_stock_code, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()), curl_in);
+		}
+	}	
 	return *this;
 }
 	
@@ -221,8 +251,9 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getRank()
 	const char *base_url = "https://emappdata.eastmoney.com/stockrank/getCurrentLatest";
 
 	//清除状态
-	char *_temp = nullptr;
-	findSpecContent(_temp, _temp, _temp, 1);
+	curl_in.clear();
+	char *temp = nullptr;
+	findSpecContent(temp, temp, temp, 1);
 		
 	struct curl_slist* headers = NULL;
 	headers = curl_slist_append(headers, "Content-Type:application/json;charset=UTF-8");
@@ -235,10 +266,17 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getRank()
 		 "\"srcSecurityCode\":\"" + std::string(_cur_stock_code[0] == '0'?"SZ":"SH") + _cur_stock_code + "\""
 		"}"
 	;
-	auto rs = getWebContent( base_url, _parseRank, this, 1, headers, params.c_str()); 
-	randomSleep(1, 3); //[min, max]
-	simpleLog.info("Get Stock Rank", _cur_stock_code, _stocks[_cur_stock_code].getHistoryAttr().rank > 0, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank));
-
+	int rs = getWebContent( base_url, _parseRank, this, 1, headers, params.c_str()); 
+	if(rs){
+		simpleLog.error("Get Stock Rank", _cur_stock_code, std::to_string(rs), curl_error_buf);
+	}else{
+		randomSleep(1, 3); //[min, max]
+		if(_stocks[_cur_stock_code].getHistoryAttr().rank > 0){
+			simpleLog.info("Get Stock Rank", _cur_stock_code, true, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank));
+		}else{
+			simpleLog.warn("Get Stock Rank", _cur_stock_code, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank), curl_in);
+		}
+	}
 	return *this;	
 }
 
@@ -246,9 +284,13 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=38&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=58&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
 	_cur_stock_code = spec_stock;
+
+	//重置静态变量
+	curl_in.clear();
+	_parseStockBasicInfo(nullptr, 0, 0, nullptr);
 
 	//获得基本信息
 	int rs = getWebContent( _BASE_URL _PARAMS _FIELDS 
@@ -268,16 +310,27 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 		"&_=1666529170575"
 		,_parseStockBasicInfo, this);
 
+	if(rs){
+		simpleLog.error("Get All Stocks Basic Info", "SpiderStocksOverview", std::to_string(rs), curl_error_buf);
+	}else{
+		if(_stocks.size() > 0){
+			simpleLog.console.info("Get ALL Stocks Basic Info", "SpiderStocksOverview", true, "SIZE: " + std::to_string(_stocks.size()) );
+		}else{
+			simpleLog.console.warn("Get ALL Stocks Basic Info", "SpiderStocksOverview", "SIZE: " + std::to_string(_stocks.size()), curl_in);
+		}
 
-	simpleLog.console.info("Get ALL Stocks Basic Info", "SpiderStocksOverview", _stocks.size() > 0, "SIZE: " + std::to_string(_stocks.size()) );
-	//获得其它信息
-	for(auto iter = _stocks.rbegin(); iter != _stocks.rend(); iter++){
-		_cur_stock_code = iter->first;
-		_getRank()._getSectors()._getTransactions();
+		//获得其它信息
+		for(auto iter = _stocks.rbegin(); iter != _stocks.rend(); iter++){
+			_cur_stock_code = iter->first;
 
-		_mysqltool->updateStockInfo(_stocks[_cur_stock_code]);
+			_getRank()._getSectors()._getTransactions();
 
-		_transactions.clear();
+			_mysqltool->updateStockInfo(_stocks[_cur_stock_code]);
+
+			_transactions.clear();
+		}
+		auto rt = simpleLog.recordInfo(true);
+		std::cout<<std::get<0>(rt)<<", "<<std::get<1>(rt)<<", "<<std::get<2>(rt)<<", "<<std::get<3>(rt)<<std::endl;
 	}
 
 	return rs;	
