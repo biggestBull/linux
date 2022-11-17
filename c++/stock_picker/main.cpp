@@ -60,8 +60,9 @@ main(int argc,char *argv[]){
 		}
 		if(url && port && user && pwd){
 			stockpicker::MySQLTool mysqltool(url,port,user,pwd);
+			stockpicker::FileTool filetool("./stocks");
 			
-			auto spider = stockpicker::SpiderStocksOverview(&mysqltool);  
+			auto spider = stockpicker::SpiderStocksOverview(&mysqltool, &filetool);  
 			spider.getAllStocks();
 		
 		}

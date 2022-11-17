@@ -56,7 +56,9 @@ namespace stockpicker{
 
 	private:
 		SimpleLog():console(*this), _record_date(_now()){
-			_openLogFile();
+			if(_openLogFile()){
+				exit(2);
+			}
 		}
 
 		SimpleLog(const SimpleLog&) = delete;

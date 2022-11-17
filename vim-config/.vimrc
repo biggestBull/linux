@@ -122,7 +122,9 @@ set matchtime=5
 set ignorecase 
  
 " 不要高亮被搜索的句子（phrases） 
-set nohlsearch 
+" set nohlsearch 
+
+set hlsearch
  
 " 在搜索时，输入的词句的逐字符高亮（类似firefox的搜索） 
 set incsearch 
@@ -367,10 +369,13 @@ inoremap *= <SPACE>*=<SPACE>
 inoremap /= <SPACE>/=<SPACE>
 inoremap %= <SPACE>%=<SPACE>
 
+
+inoremap := <SPACE>:=<SPACE>
+" 即 |
+inoremap <Bar>= <SPACE><Bar>=<SPACE>
 inoremap >>= <SPACE>>>=<SPACE>
 inoremap <<= <SPACE><<=<SPACE>
 inoremap &= <SPACE>&=<SPACE>
-inoremap <Bar>= <SPACE><Bar>=<SPACE>
 inoremap ^= <SPACE>^=<SPACE>
 
 inoremap = <SPACE>=<SPACE>

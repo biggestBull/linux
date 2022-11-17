@@ -11,6 +11,7 @@
 
 #include"stock.hpp"
 #include"mysqltool.hpp"
+#include"filetool.hpp"
 #include"log.hpp"
 
 #define CURL_MAX_ERROR_BUF_LENGTH 1000
@@ -94,6 +95,7 @@ namespace stockpicker{
 	class SpiderStocksOverview:Spider{
 	private:
 		MySQLTool *_mysqltool;	
+		FileTool *_filetool;
 
 		const char *_stock_filter[7] = {"0", "600", "601","602","603","604","605"};
 		std::map<std::string, Stock> _stocks;
@@ -117,7 +119,7 @@ namespace stockpicker{
 		void _addTransaction(std::string transaction);
 	
 	public:
-		SpiderStocksOverview(MySQLTool *mysqltool):_mysqltool(mysqltool){}
+		SpiderStocksOverview(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
 
 		int getAllStocks(std::string spec_stock = "");
 	};
