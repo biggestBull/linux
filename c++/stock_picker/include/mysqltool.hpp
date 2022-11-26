@@ -22,7 +22,7 @@ namespace stockpicker{
 
 		#include"mysql.inc"
 
-		int _checkTables(){
+		int _prepare(){
 			int status = 0;
 			uint tables_num = sizeof(_tables)/sizeof(*_tables);
 			for(int i = 0;i != tables_num;i++){
@@ -33,6 +33,17 @@ namespace stockpicker{
 			}
 			return 0;	
 		}
+
+	protected:
+		std::string Table_stocks_info = "stocks_info";
+		std::string Table_sectors = "sectors";
+		std::string Table_stock_sector_related = "stock_sector_related";
+		std::string Table_stocks_history = "stocks_history";
+
+		void _error(std::string&);
+		int _exec(std::string&);
+		MYSQL_RES* _query(std::string&);
+		bool dataAlreadyExists(std::string&);
 	
 	public:
 		MySQLTool(const char *url,int port,const char *user,const char *pwd){
@@ -50,7 +61,7 @@ namespace stockpicker{
 			}
 			
 			// XXX 建表，stock_picker的一生只需要执行一次, 并且需要权限
-			//_checkTables();
+			//_prepare();
 		}
 	
 		~MySQLTool(){

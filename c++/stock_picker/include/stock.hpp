@@ -36,6 +36,7 @@ namespace stockpicker{
 	
 	struct Stock{
 	public:
+		int code;
 		int pe;
 		long market_value;
 		long traded_market_value;
@@ -43,6 +44,9 @@ namespace stockpicker{
 		std::vector<std::string> sectors;
 		StockHistoryOverview history_attr;
 	
+		Stock() = default;
+		Stock(int code):code(code){}
+
 		Stock& setPe(int pe){this->pe = pe;return *this;}
 		Stock& setMarketValue(long market_value){this->market_value = market_value;return *this;}
 		Stock& setTradedMarketValue(long traded_market_value){this->traded_market_value = traded_market_value;return *this;}
