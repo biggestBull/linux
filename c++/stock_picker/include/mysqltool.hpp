@@ -34,17 +34,17 @@ namespace stockpicker{
 			return 0;	
 		}
 
+		void _error(std::string&);
+		int _exec(std::string&);
+		MYSQL_RES* _query(std::string&);
+		bool _dataAlreadyExists(std::string&);
+
 	protected:
 		std::string Table_stocks_info = "stocks_info";
 		std::string Table_sectors = "sectors";
 		std::string Table_stock_sector_related = "stock_sector_related";
 		std::string Table_stocks_history = "stocks_history";
 
-		void _error(std::string&);
-		int _exec(std::string&);
-		MYSQL_RES* _query(std::string&);
-		bool dataAlreadyExists(std::string&);
-	
 	public:
 		MySQLTool(const char *url,int port,const char *user,const char *pwd){
 			mysql_init(&_mysql);
@@ -69,6 +69,7 @@ namespace stockpicker{
 		}
 
 		int updateStockInfo(Stock&);
+		int updateStockHistory(Stock&);
 	};
 }
 

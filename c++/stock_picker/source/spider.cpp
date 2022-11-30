@@ -284,7 +284,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=4&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=10&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
 	_cur_stock_code = spec_stock;
 
@@ -338,9 +338,10 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 }
 
 void stockpicker::SpiderStocksOverview::_addStock(std::map<std::string, std::string> &stock_attr){
-	if(!_cur_stock_code.empty() && stock_attr[_STOCK_CODE_KEY] != _cur_stock_code) return;
+	//针对指定的stock的情况:如果当前stock_code不为空，则意味着我仅需要特定的stock
+	if((!_cur_stock_code.empty() && stock_attr[_STOCK_CODE_KEY] != _cur_stock_code) || stock_attr[_STOCK_CODE_KEY].empty()) return;
 
-	_stocks[stock_attr[_STOCK_CODE_KEY]] = Stock(std::stoi(_cur_stock_code)).setName(stock_attr[_STOCK_NAME_KEY])
+	_stocks[stock_attr[_STOCK_CODE_KEY]] = Stock(std::stoi(stock_attr[_STOCK_CODE_KEY])).setName(stock_attr[_STOCK_NAME_KEY])
 									.setPe(float_str_to_int(stock_attr[_STOCK_PE_KEY]))
 									.setMarketValue(std::stol(stock_attr[_STOCK_MARKET_VALUE_KEY]))
 									.setTradedMarketValue(std::stol(stock_attr[_STOCK_TRADED_MARKET_VALUE_KEY]))
@@ -351,9 +352,9 @@ void stockpicker::SpiderStocksOverview::_addStock(std::map<std::string, std::str
 										.setPriceLowest(float_str_to_int(stock_attr[_STOCK_LOWST_PRICE_KEY]))
 										.setAmplitude(float_str_to_int(stock_attr[_STOCK_AMPLITUDE_KEY]))
 										.setTurnoverRate(float_str_to_int(stock_attr[_STOCK_TURNOVER_RATE_KEY]))
-										.setTurnoverSum(float_str_to_int(stock_attr[_STOCK_TURNOVER_KEY]))
+										.setTurnoverSum(float_str_to_long(stock_attr[_STOCK_TURNOVER_KEY]))
 										.setChangePercent(float_str_to_int(stock_attr[_STOCK_CHANGEPERCENT_KEY]))
-										.setDate(date.c_str())
+										.setDate(date)
 								;
 }
 

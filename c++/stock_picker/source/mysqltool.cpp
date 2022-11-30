@@ -25,7 +25,7 @@ namespace stockpicker{
 		return result;
 	}
 
-	bool MySQLTool::dataAlreadyExists(std::string &sql){
+	bool MySQLTool::_dataAlreadyExists(std::string &sql){
 		MYSQL_RES *result;
 		if(!(result = _query(sql))) return false;
 
@@ -35,10 +35,31 @@ namespace stockpicker{
 		return rt > 0;
 	}
 
+	int MySQLTool::updateStockHistory(Stock& stock){
+		int rt = 0;
+
+		StockHistoryOverview &history = stock.history_attr;
+
+		std::string sql = "REPLACE INTO stocks_history( stock_code, created_date, rank, price_start, price_newst, price_higest, price_lowest, turnover_rate, turnover_sum, amplitude, change_percent )  VALUES( " + 
+								std::to_string(stock.code) + ", '" + history.date +"', " + std::to_string(history.rank) + ", " +
+								std::to_string(history.price_start) + ", " + std::to_string(history.price_newst) + ", " + 
+								std::to_string(history.price_higest) + ", " + std::to_string(history.price_lowest) + ", " + 
+								std::to_string(history.turnover_rate) + ", " + std::to_string(history.turnover_sum) + ", " +
+								std::to_string(history.amplitude) + ", " + std::to_string(history.change_percent) + 
+							")"
+						;
+
+		if(_exec(sql)) rt = -1;
+
+		return rt;
+	}
+
 	int MySQLTool::updateStockInfo(Stock& stock){
+		int rt = 0;
+
 		std::string sql = "SELECT stock_code FROM " + Table_stocks_info + " WHERE stock_code = " + std::to_string(stock.code);  
 		
-		if(dataAlreadyExists(sql)){
+		if(_dataAlreadyExists(sql)){
 			sql = "UPDATE " + Table_stocks_info + " SET stock_name = '" + stock.name +
 													"', pe = " + std::to_string(stock.pe) +
 													",  market_value= " + std::to_string(stock.market_value) +
@@ -54,9 +75,10 @@ namespace stockpicker{
 						;
 		}
 
-		if(_exec(sql)) return -1;
+		if(_exec(sql)) rt = -1;
+		rt |= updateStockHistory(stock);
 
-		return 0;	
+		return rt;	
 	}
 
 }

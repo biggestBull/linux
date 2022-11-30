@@ -4,7 +4,6 @@
 
 #include<vector>
 #include<string>
-#include<string.h>
 	
 namespace stockpicker{
 	
@@ -19,7 +18,7 @@ namespace stockpicker{
 		long turnover_sum;
 		int change_percent;
 		std::string *transactions;
-		char date[12]; //YYYYMMDD
+		std::string date; //YYYYMMDD
 	
 		StockHistoryOverview& setRank(int rank){this->rank = rank;return *this;}
 		StockHistoryOverview& setPriceStart(int price_start){this->price_start = price_start;return *this;}
@@ -28,10 +27,10 @@ namespace stockpicker{
 		StockHistoryOverview& setPriceLowest(int price_lowest){this->price_lowest = price_lowest;return *this;}
 		StockHistoryOverview& setAmplitude(int amplitude){this->amplitude = amplitude;return *this;}
 		StockHistoryOverview& setTurnoverRate(int turnover_rate){this->turnover_rate = turnover_rate;return *this;}
-		StockHistoryOverview& setTurnoverSum(int turnover_sum){this->turnover_sum = turnover_sum;return *this;}
+		StockHistoryOverview& setTurnoverSum(long turnover_sum){this->turnover_sum = turnover_sum;return *this;}
 		StockHistoryOverview& setChangePercent(int change_percent){this->change_percent = change_percent;return *this;}
 		StockHistoryOverview& setTransactions(std::string *transactions){this->transactions = transactions;return *this;}
-		StockHistoryOverview& setDate(const char date[12]){strncpy(this->date, date, 12);return *this;}
+		StockHistoryOverview& setDate(std::string &date){this->date = date;return *this;}
 	};
 	
 	struct Stock{

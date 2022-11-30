@@ -62,12 +62,8 @@ main(int argc,char *argv[]){
 			stockpicker::MySQLTool mysqltool(url,port,user,pwd);
 			stockpicker::FileTool filetool("./stocks");
 			
-			stockpicker::Stock stock(100);
-			stock.name = "小垃圾";
-			stock.market_value = 199819992000;
-			mysqltool.updateStockInfo(stock);
-			//auto spider = stockpicker::SpiderStocksOverview(&mysqltool, &filetool);  
-			//spider.getAllStocks();
+			auto spider = stockpicker::SpiderStocksOverview(&mysqltool, &filetool);  
+			spider.getAllStocks();
 		
 		}
 	}else{

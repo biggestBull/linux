@@ -1,13 +1,15 @@
 #ifndef _STOCK_PICKER_SPIDER_H
 #define _STOCK_PICKER_SPIDER_H
 
-#include<curl/curl.h>
 #include<iostream>
 #include<map>
 #include<sstream>
+
+#include<curl/curl.h>
 #include<time.h>
 #include<unistd.h>
 #include<stdlib.h>
+#include<math.h>
 
 #include"stock.hpp"
 #include"mysqltool.hpp"
@@ -33,11 +35,11 @@
 namespace stockpicker{
 
 	inline int float_str_to_int(std::string str){
-	    return static_cast<int>(std::stof(str) * 100);
+	    return static_cast<int>(ceil(std::stof(str) * 100));
 	}
 	
 	inline long float_str_to_long(std::string str){
-	    return static_cast<long>(std::stof(str) * 100);
+	    return static_cast<long>(ceil(std::stof(str) * 100));
 	}
 		
 	inline void randomSleep(int min, int max){
