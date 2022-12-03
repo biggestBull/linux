@@ -211,13 +211,13 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getTransa
 
 	int rs = getWebContent( url.c_str(), _parseTransactions, this); 
 	if(rs){
-		simpleLog.error("Get Stock Transactions", _cur_stock_code, std::to_string(rs), curl_error_buf);
+		simple_log.error("Get Stock Transactions", _cur_stock_code, std::to_string(rs), curl_error_buf);
 	}else{
 		randomSleep(1, 3); //[min, max]
 		if(!_transactions.empty()){
-			simpleLog.info("Get Stock Transactions", _cur_stock_code, true, "");
+			simple_log.info("Get Stock Transactions", _cur_stock_code, true, "");
 		}else{
-			simpleLog.warn("Get Stock Transactions", _cur_stock_code, "", curl_in);
+			simple_log.warn("Get Stock Transactions", _cur_stock_code, "", curl_in);
 		}
 	}				   
 	return *this;
@@ -235,13 +235,13 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getSector
 
 	int rs = getWebContent( url.c_str(), _parseSectors, this); 
 	if(rs){
-		simpleLog.error("Get Stock Sectors", _cur_stock_code, std::to_string(rs), curl_error_buf);
+		simple_log.error("Get Stock Sectors", _cur_stock_code, std::to_string(rs), curl_error_buf);
 	}else{
 		randomSleep(1, 3); //[min, max]
 		if(_stocks[_cur_stock_code].sectors.size() > 0){
-			simpleLog.info("Get Stock Sectors", _cur_stock_code, true, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()));
+			simple_log.info("Get Stock Sectors", _cur_stock_code, true, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()));
 		}else{
-			simpleLog.warn("Get Stock Sectors", _cur_stock_code, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()), curl_in);
+			simple_log.warn("Get Stock Sectors", _cur_stock_code, "SIZE :" + std::to_string(_stocks[_cur_stock_code].sectors.size()), curl_in);
 		}
 	}	
 	return *this;
@@ -268,13 +268,13 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getRank()
 	;
 	int rs = getWebContent( base_url, _parseRank, this, 1, headers, params.c_str()); 
 	if(rs){
-		simpleLog.error("Get Stock Rank", _cur_stock_code, std::to_string(rs), curl_error_buf);
+		simple_log.error("Get Stock Rank", _cur_stock_code, std::to_string(rs), curl_error_buf);
 	}else{
 		randomSleep(1, 3); //[min, max]
 		if(_stocks[_cur_stock_code].getHistoryAttr().rank > 0){
-			simpleLog.info("Get Stock Rank", _cur_stock_code, true, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank));
+			simple_log.info("Get Stock Rank", _cur_stock_code, true, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank));
 		}else{
-			simpleLog.warn("Get Stock Rank", _cur_stock_code, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank), curl_in);
+			simple_log.warn("Get Stock Rank", _cur_stock_code, _cur_stock_code + " : " + std::to_string(_stocks[_cur_stock_code].getHistoryAttr().rank), curl_in);
 		}
 	}
 	return *this;	
@@ -284,7 +284,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=10&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=28&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
 	_cur_stock_code = spec_stock;
 
@@ -311,12 +311,12 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 		,_parseStockBasicInfo, this);
 
 	if(rs){
-		simpleLog.error("Get All Stocks Basic Info", "SpiderStocksOverview", std::to_string(rs), curl_error_buf);
+		simple_log.error("Get All Stocks Basic Info", "SpiderStocksOverview", std::to_string(rs), curl_error_buf);
 	}else{
 		if(_stocks.size() > 0){
-			simpleLog.console.info("Get ALL Stocks Basic Info", "SpiderStocksOverview", true, "SIZE: " + std::to_string(_stocks.size()) );
+			simple_log.console.info("Get ALL Stocks Basic Info", "SpiderStocksOverview", true, "SIZE: " + std::to_string(_stocks.size()) );
 		}else{
-			simpleLog.console.warn("Get ALL Stocks Basic Info", "SpiderStocksOverview", "SIZE: " + std::to_string(_stocks.size()), curl_in);
+			simple_log.console.warn("Get ALL Stocks Basic Info", "SpiderStocksOverview", "SIZE: " + std::to_string(_stocks.size()), curl_in);
 		}
 
 		//获得其它信息
@@ -330,7 +330,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 
 			_transactions.clear();
 		}
-		auto rt = simpleLog.recordInfo(true);
+		auto rt = simple_log.recordInfo(true);
 		std::cout<<std::get<0>(rt)<<", "<<std::get<1>(rt)<<", "<<std::get<2>(rt)<<", "<<std::get<3>(rt)<<std::endl;
 	}
 

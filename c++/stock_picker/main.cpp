@@ -64,7 +64,6 @@ main(int argc,char *argv[]){
 			
 			auto spider = stockpicker::SpiderStocksOverview(&mysqltool, &filetool);  
 			spider.getAllStocks();
-		
 		}
 	}else{
 		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd\n",argv[0]);

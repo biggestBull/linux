@@ -2,7 +2,7 @@
 
 namespace stockpicker{
 	void MySQLTool::_error(std::string &sql){
-		_simpleLog.error("Execute SQL", sql, "Failed", mysql_error(&_mysql));	
+		simple_log.error("Execute SQL", sql, "Failed", mysql_error(&_mysql));	
 	}
 
 	int MySQLTool::_exec(std::string &sql){
@@ -25,7 +25,30 @@ namespace stockpicker{
 		return result;
 	}
 
-	bool MySQLTool::_dataAlreadyExists(std::string &sql){
+	std::vector<std::vector<std::string>> MySQLTool::query(std::string& sql){
+		std::vector<std::vector<std::string>> results;
+
+		auto query_result = _query(sql);
+		
+		auto num_fields = mysql_num_fields(query_result);
+
+		MYSQL_ROW row;
+		while((row = mysql_fetch_row(query_result))){
+			unsigned long *lengths;
+			lengths = mysql_fetch_lengths(query_result);
+
+			std::vector<std::string> row_fields;
+			for(unsigned int i = 0; i < num_fields; i++){
+				row_fields.push_back(std::string(row[i]));
+			}
+			results.push_back(row_fields);
+		}	
+
+		mysql_free_result(query_result);
+		return results; 	
+	}
+
+	bool MySQLTool::dataAlreadyExists(std::string &sql){
 		MYSQL_RES *result;
 		if(!(result = _query(sql))) return false;
 
@@ -35,9 +58,29 @@ namespace stockpicker{
 		return rt > 0;
 	}
 
-	int MySQLTool::updateStockHistory(Stock& stock){
+	int MySQLTool::updateStockSectors(Stock& stock){
 		int rt = 0;
 
+		std::string sql = "DELETE FROM " + Table_stock_sector_related + " WHERE stock_code = " + std::to_string(stock.code);
+		if( rt = _exec(sql) ) return rt;
+
+		for(auto &sector:stock.sectors){
+			auto sector_id = _getSectorId(sector);
+			if(!sector_id) {
+				simple_log.error("Get Sector ID", sector, std::to_string(sector_id), "");
+				continue;
+			}
+			sql = "INSERT INTO " + Table_stock_sector_related + "(stock_code, sector_id) VALUES(" + std::to_string(stock.code) + ", " + std::to_string(sector_id) + ")";
+			rt  |= _exec(sql);
+		}
+
+		if(rt)
+			simple_log.error("Update Stock Sectors", std::to_string(stock.code), std::to_string(rt), "");	
+
+		return rt;
+	}
+
+	int MySQLTool::updateStockHistory(Stock& stock){
 		StockHistoryOverview &history = stock.history_attr;
 
 		std::string sql = "REPLACE INTO stocks_history( stock_code, created_date, rank, price_start, price_newst, price_higest, price_lowest, turnover_rate, turnover_sum, amplitude, change_percent )  VALUES( " + 
@@ -49,7 +92,9 @@ namespace stockpicker{
 							")"
 						;
 
-		if(_exec(sql)) rt = -1;
+		auto rt = _exec(sql);
+		if(rt)
+			simple_log.error("Update Stock History", std::to_string(stock.code), std::to_string(rt), "");	
 
 		return rt;
 	}
@@ -59,7 +104,7 @@ namespace stockpicker{
 
 		std::string sql = "SELECT stock_code FROM " + Table_stocks_info + " WHERE stock_code = " + std::to_string(stock.code);  
 		
-		if(_dataAlreadyExists(sql)){
+		if(dataAlreadyExists(sql)){
 			sql = "UPDATE " + Table_stocks_info + " SET stock_name = '" + stock.name +
 													"', pe = " + std::to_string(stock.pe) +
 													",  market_value= " + std::to_string(stock.market_value) +
@@ -75,8 +120,12 @@ namespace stockpicker{
 						;
 		}
 
-		if(_exec(sql)) rt = -1;
+		rt |= _exec(sql);
+		if(rt)
+			simple_log.error("Update Stock Info", std::to_string(stock.code), std::to_string(rt), "");	
+
 		rt |= updateStockHistory(stock);
+		rt |= updateStockSectors(stock);
 
 		return rt;	
 	}

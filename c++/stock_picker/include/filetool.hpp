@@ -16,8 +16,10 @@
 namespace stockpicker{
 	
 	class FileTool{
+	protected:
+		SimpleLog& simple_log = SimpleLog::getInstance();
+
 	private:
-		SimpleLog& _simpleLog = SimpleLog::getInstance();
 		std::string _base_dir;
 
 		bool _checkAndCreateDir(const std::string& path){
@@ -51,9 +53,9 @@ namespace stockpicker{
 				if( _writeToFile(path + "/" + stock_code, tas)){
 					return 0;	
 				}
-				_simpleLog.error("Write To File", stock_code, "Failed", "");
+				simple_log.error("Write To File", stock_code, "Failed", "");
 			}
-			_simpleLog.error("Create Dir", stock_code, "Failed", "");
+			simple_log.error("Create Dir", stock_code, "Failed", "");
 			return -1;
 		}
 	};

@@ -35,11 +35,11 @@
 namespace stockpicker{
 
 	inline int float_str_to_int(std::string str){
-	    return static_cast<int>(ceil(std::stof(str) * 100));
+	    return static_cast<int>(round(std::stof(str) * 100));
 	}
 	
 	inline long float_str_to_long(std::string str){
-	    return static_cast<long>(ceil(std::stof(str) * 100));
+	    return static_cast<long>(round(std::stof(str) * 100));
 	}
 		
 	inline void randomSleep(int min, int max){
@@ -57,7 +57,7 @@ namespace stockpicker{
 		std::string curl_in;
 		char curl_error_buf[CURL_MAX_ERROR_BUF_LENGTH];
 
-		SimpleLog &simpleLog = SimpleLog::getInstance();
+		SimpleLog &simple_log = SimpleLog::getInstance();
 	
 		Spider(){
 			_curl = curl_easy_init();	
