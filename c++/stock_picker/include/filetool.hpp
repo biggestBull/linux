@@ -35,7 +35,7 @@ namespace stockpicker{
 		bool _writeToFile(const std::string& path,const std::string& data){
 			std::fstream target_file;
 
-			target_file.open( path.c_str(), std::ios::app);
+			target_file.open( path.c_str(), std::ios::out);
             if(target_file.fail()){
 				return false;	
 			}
