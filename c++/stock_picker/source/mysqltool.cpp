@@ -1,11 +1,11 @@
 #include"../include/mysqltool.hpp"
 
 namespace stockpicker{
-	void MySQLTool::_error(std::string &sql){
+	void MySQLTool::_error(const std::string &sql){
 		simple_log.error("Execute SQL", sql, "Failed", mysql_error(&_mysql));	
 	}
 
-	int MySQLTool::_exec(std::string &sql){
+	int MySQLTool::_exec(const std::string &sql){
 		int rt = 0;
 		if(rt = mysql_query(&_mysql, sql.c_str())){ 
 			_error(sql);
@@ -14,7 +14,7 @@ namespace stockpicker{
 		return 0;
 	}
 
-	MYSQL_RES* MySQLTool::_query(std::string &sql){
+	MYSQL_RES* MySQLTool::_query(const std::string &sql){
 		_exec(sql);
 
 		auto *result = mysql_store_result(&_mysql);
@@ -25,7 +25,7 @@ namespace stockpicker{
 		return result;
 	}
 
-	std::vector<std::vector<std::string>> MySQLTool::query(std::string& sql){
+	std::vector<std::vector<std::string>> MySQLTool::query(const std::string& sql){
 		std::vector<std::vector<std::string>> results;
 
 		auto query_result = _query(sql);
@@ -48,7 +48,7 @@ namespace stockpicker{
 		return results; 	
 	}
 
-	bool MySQLTool::dataAlreadyExists(std::string &sql){
+	bool MySQLTool::dataAlreadyExists(const std::string &sql){
 		MYSQL_RES *result;
 		if(!(result = _query(sql))) return false;
 

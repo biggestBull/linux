@@ -284,7 +284,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
-	#define _PARAMS "&pn=1&pz=28&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
+	#define _PARAMS "&pn=1&pz=50000&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&"
 	
 	_cur_stock_code = spec_stock;
 

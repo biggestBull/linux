@@ -19,9 +19,9 @@ namespace stockpicker{
 
 	class MySQLTool{
 	private:
-		void _error(std::string&);
-		int _exec(std::string&);
-		MYSQL_RES* _query(std::string&);
+		void _error(const std::string&);
+		int _exec(const std::string&);
+		MYSQL_RES* _query(const std::string&);
 
 	protected:
 		SimpleLog& simple_log = SimpleLog::getInstance();
@@ -31,8 +31,8 @@ namespace stockpicker{
 		std::string Table_stock_sector_related = "stock_sector_related";
 		std::string Table_stocks_history = "stocks_history";
 
-		std::vector<std::vector<std::string>> query(std::string&);
-		bool dataAlreadyExists(std::string&);
+		std::vector<std::vector<std::string>> query(const std::string&);
+		bool dataAlreadyExists(const std::string&);
 
 	private:
 		MYSQL _mysql;
@@ -85,10 +85,16 @@ namespace stockpicker{
 	
 			int status = 0;
 			if((status = mysql_select_db(&_mysql,_db_name)) != 0){
-				simple_log.error("Selecy Database", std::string(_db_name), "Failed", std::to_string(status));
+				simple_log.error("Select Database", std::string(_db_name), "Failed", std::to_string(status));
 				exit(status);	
 			}
 			
+			std::string sql = "SET NAMES UTF8;";
+			if((status = _exec(sql))){
+				simple_log.error("Set Names", std::string(_db_name), "Failed", std::to_string(status));
+				exit(status);	
+			}
+
 			// XXX 建表，stock_picker的一生只需要执行一次, 并且需要权限
 			//_prepareTable();
 

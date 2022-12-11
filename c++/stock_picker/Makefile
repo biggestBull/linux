@@ -6,4 +6,4 @@ HEADS := ./include/*.hpp ./include/*.inc
 SOURCES := ./source/*.cpp  
 
 a.out: main.cpp $(SOURCES) $(HEADS)
-	$(CXX) --std=c++11 main.cpp $(SOURCES) $(LIBS) 
+	$(CXX) --std=c++11 main.cpp $(SOURCES) $(LIBS) -o stock_picker 
