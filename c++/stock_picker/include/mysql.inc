@@ -30,7 +30,7 @@
             `price_newst` INT UNSIGNED NOT NULL,
             `price_higest` INT UNSIGNED NOT NULL,
             `price_lowest` INT UNSIGNED NOT NULL,
-            `turnover_rate` INT UNSIGNED NOT NULL,
+            `turnover_rate` INT NOT NULL,
             `turnover_sum` BIGINT UNSIGNED NOT NULL,
             `amplitude` INT UNSIGNED NOT NULL,
             `change_percent` INT NOT NULL,
