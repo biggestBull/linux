@@ -331,7 +331,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 			_transactions.clear();
 		}
 		auto rt = simple_log.recordInfo(true);
-		std::cout<<std::get<0>(rt)<<", "<<std::get<1>(rt)<<", "<<std::get<2>(rt)<<", "<<std::get<3>(rt)<<std::endl;
+		simple_log.console.info("Get ALL Stocks Logs Overview", "warn: " + std::to_string(std::get<1>(rt)) + ", error: " + std::to_string(std::get<2>(rt)) + ", fatal: " + std::to_string(std::get<3>(rt)), true, "");
 	}
 
 	return rs;	
