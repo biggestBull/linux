@@ -341,6 +341,14 @@ void stockpicker::SpiderStocksOverview::_addStock(std::map<std::string, std::str
 	//针对指定的stock的情况:如果当前stock_code不为空，则意味着我仅需要特定的stock
 	if((!_cur_stock_code.empty() && stock_attr[_STOCK_CODE_KEY] != _cur_stock_code) || stock_attr[_STOCK_CODE_KEY].empty()) return;
 
+	//std::cout<<stock_attr[_STOCK_NAME_KEY]<<", "<<stock_attr[_STOCK_MARKET_VALUE_KEY]<<", "<<stock_attr[_STOCK_MARKET_VALUE_KEY].compare("-")<<std::endl;
+
+	//退市股
+	if(!stock_attr[_STOCK_MARKET_VALUE_KEY].compare("-") || !stock_attr[_STOCK_TRADED_MARKET_VALUE_KEY].compare("-")) return;
+
+	//停牌股
+	if(!stock_attr[_STOCK_START_PRICE_KEY].compare("-")) return;
+
 	_stocks[stock_attr[_STOCK_CODE_KEY]] = Stock(std::stoi(stock_attr[_STOCK_CODE_KEY])).setName(stock_attr[_STOCK_NAME_KEY])
 									.setPe(float_str_to_int(stock_attr[_STOCK_PE_KEY]))
 									.setMarketValue(std::stol(stock_attr[_STOCK_MARKET_VALUE_KEY]))
