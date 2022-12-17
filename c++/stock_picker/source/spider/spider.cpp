@@ -329,7 +329,7 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock, std:
 			}
 
 			_updateStockInfo(_stocks[_cur_stock_code]);
-			_storageStockTransactions(_transactions, date, _cur_stock_code);
+			_storageStockTransactions(_transactions, _stocks[_cur_stock_code].getHistoryAttr().date, _cur_stock_code);
 
 			_transactions.clear();
 		}
