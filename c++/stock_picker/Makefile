@@ -2,8 +2,13 @@
 
 CXX := g++
 LIBS := -lmysqlclient -lcurl  
-HEADS := ./include/*.hpp ./include/*.inc 
-SOURCES := ./source/*.cpp  
+HEADS := ./include/spider/*.hpp ./include/public/*.hpp ./include/public/*.inc 
+SOURCES := ./source/spider/*.cpp ./source/public/*.cpp 
 
-a.out: main.cpp $(SOURCES) $(HEADS)
-	$(CXX) --std=c++11 main.cpp $(SOURCES) $(LIBS) -o stock_picker 
+spider: spider_main.cpp $(SOURCES) $(HEADS)
+	$(CXX) --std=c++11 spider_main.cpp $(SOURCES) $(LIBS) -o spider 
+
+.PHONY:clean
+clean:
+	rm spider
+

@@ -18,6 +18,8 @@
 namespace stockpicker{
 
 	class MySQLTool{
+		friend class SpiderStocksOverview;
+
 	private:
 		void _error(const std::string&);
 		int _exec(const std::string&);
@@ -64,7 +66,7 @@ namespace stockpicker{
 			return _all_sectors.size();
 		}
 
-		unsigned int _getSectorId(std::string &sector){
+		unsigned int _getSectorId(const std::string &sector){
 			if(_all_sectors.find(sector) != _all_sectors.end()){
 				return _all_sectors[sector];
 			}
@@ -105,9 +107,6 @@ namespace stockpicker{
 			mysql_close(&_mysql);
 		}
 
-		int updateStockInfo(Stock&);
-		int updateStockHistory(Stock&);
-		int updateStockSectors(Stock&);
 	};
 }
 

@@ -11,11 +11,11 @@
 #include<dirent.h>
 #include<unistd.h>
 
-#include"log.hpp"
-
 namespace stockpicker{
 	
 	class FileTool{
+		friend class SpiderStocksOverview;
+
 	protected:
 		SimpleLog& simple_log = SimpleLog::getInstance();
 
@@ -46,18 +46,6 @@ namespace stockpicker{
 	public:
 		FileTool(const std::string& dir):_base_dir(dir){}
 
-		int storageStockTransactions(const std::string& tas, const std::string& date, const std::string stock_code){
-			std::string path = _base_dir + "/" + date;
-
-			if( _checkAndCreateDir(path) ){
-				if( _writeToFile(path + "/" + stock_code, tas)){
-					return 0;	
-				}
-				simple_log.error("Write To File", stock_code, "Failed", "");
-			}
-			simple_log.error("Create Dir", stock_code, "Failed", "");
-			return -1;
-		}
 	};
 }
 

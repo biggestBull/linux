@@ -115,6 +115,10 @@ hi cppSTLcast ctermfg=209
 " 我写的: start
 " 函数调用,放弃
 "hi callFunction	ctermfg=2
+
+"中文标点
+hi ZHPunctuation ctermfg=1
+
 " 类名
 hi className	ctermfg=1
 

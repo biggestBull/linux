@@ -3,9 +3,9 @@
 #include<getopt.h>
 #include<string>
 
-#include"include/mysqltool.hpp"
-#include"include/spider.hpp"
-#include"include/stock.hpp"
+#include"include/public/mysqltool.hpp"
+#include"include/spider/spider.hpp"
+#include"include/public/stock.hpp"
 
 int
 main(int argc,char *argv[]){
@@ -15,7 +15,9 @@ main(int argc,char *argv[]){
 		OPT_VALUE_URL = 1,
 		OPT_VALUE_PORT,
 		OPT_VALUE_USER,
-		OPT_VALUE_PWD
+		OPT_VALUE_PWD, 
+		OPT_VALUE_CODE, 
+		OPT_VALUE_DATE 
 	};
 
 	static const option long_options[] = {
@@ -23,6 +25,8 @@ main(int argc,char *argv[]){
 		{ "port", required_argument, NULL, OPTS::OPT_VALUE_PORT },
 		{ "user", required_argument, NULL, OPTS::OPT_VALUE_USER },
 		{ "pwd", required_argument, NULL, OPTS::OPT_VALUE_PWD },
+		{ "code", required_argument, NULL, OPTS::OPT_VALUE_CODE },
+		{ "date", required_argument, NULL, OPTS::OPT_VALUE_DATE },
 		{ NULL, no_argument, NULL, 0 }
 	};
 	
@@ -33,6 +37,9 @@ main(int argc,char *argv[]){
 	const char *url = nullptr;
 	const char *user = nullptr;
 	const char *pwd = nullptr;
+
+	const char *code = nullptr;
+	const char *date = nullptr;
 
 	if(argc > 5){
 		while(true){
@@ -54,6 +61,12 @@ main(int argc,char *argv[]){
 				case OPTS::OPT_VALUE_PWD:
 					pwd = optarg;
 					break;
+				case OPTS::OPT_VALUE_CODE:
+					code = optarg;
+					break;
+				case OPTS::OPT_VALUE_DATE:
+					date = optarg;
+					break;
 				default:
 					printf("unkown param : %d\n",opterr);
 			}
@@ -63,10 +76,14 @@ main(int argc,char *argv[]){
 			stockpicker::FileTool filetool("./stocks");
 			
 			auto spider = stockpicker::SpiderStocksOverview(&mysqltool, &filetool);  
-			spider.getAllStocks();
+			if(code && date){
+				spider.getAllStocks(code, date);
+			}else{
+				spider.getAllStocks();
+			}
 		}
 	}else{
-		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd\n",argv[0]);
+		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd [ --code _code ] [ --date _date ( for example: 2022-12-17 ) ]\n",argv[0]);
 	}
 
 	curl_global_cleanup();

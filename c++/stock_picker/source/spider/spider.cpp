@@ -1,4 +1,4 @@
-#include"../include/spider.hpp"
+#include"../../include/spider/spider.hpp"
 
 /* -----------------------------------  解析器 Start -------------------------------------  */
 
@@ -280,7 +280,7 @@ stockpicker::SpiderStocksOverview& stockpicker::SpiderStocksOverview::_getRank()
 	return *this;	
 }
 
-int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
+int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock, std::string spec_date){
 	/* TODO 这显然不是一个长期的接口 */
 	#define _FIELDS "fields="
 	#define _BASE_URL "http://45.push2.eastmoney.com/api/qt/clist/get?cb=jQuery112405393508833921838_1666529170574"
@@ -324,9 +324,12 @@ int stockpicker::SpiderStocksOverview::getAllStocks(std::string spec_stock){
 			_cur_stock_code = iter->first;
 
 			_getRank()._getSectors()._getTransactions();
+			if(!spec_date.empty()){
+				_stocks[_cur_stock_code].getHistoryAttr().setDate(spec_date);
+			}
 
-			_mysqltool->updateStockInfo(_stocks[_cur_stock_code]);
-			_filetool->storageStockTransactions(_transactions, date, _cur_stock_code);
+			_updateStockInfo(_stocks[_cur_stock_code]);
+			_storageStockTransactions(_transactions, date, _cur_stock_code);
 
 			_transactions.clear();
 		}
@@ -379,3 +382,87 @@ void stockpicker::SpiderStocksOverview::_addTransaction(std::string transactions
 	_stocks[_cur_stock_code].getHistoryAttr().setTransactions(&this->_transactions);
 }
 
+int stockpicker::SpiderStocksOverview::_updateStockSectors(const Stock& stock){
+	int rt = 0;
+
+	std::string sql = "DELETE FROM " + _mysqltool->Table_stock_sector_related + " WHERE stock_code = " + std::to_string(stock.code);
+	if( rt = _mysqltool->_exec(sql) ) return rt;
+
+	for(auto &sector:stock.sectors){
+		auto sector_id = _mysqltool->_getSectorId(sector);
+		if(!sector_id) {
+			simple_log.error("Get Sector ID", sector, std::to_string(sector_id), "");
+			continue;
+		}
+		sql = "INSERT INTO " + _mysqltool->Table_stock_sector_related + "(stock_code, sector_id) VALUES(" + std::to_string(stock.code) + ", " + std::to_string(sector_id) + ")";
+		rt  |= _mysqltool->_exec(sql);
+	}
+
+	if(rt)
+		simple_log.error("Update Stock Sectors", std::to_string(stock.code), std::to_string(rt), "");	
+
+	return rt;
+}
+
+int stockpicker::SpiderStocksOverview::_updateStockHistory(const Stock& stock){
+	const StockHistoryOverview &history = stock.history_attr;
+
+	std::string sql = "REPLACE INTO " + _mysqltool->Table_stocks_history + "( stock_code, created_date, rank, price_start, price_newst, price_higest, price_lowest, turnover_rate, turnover_sum, amplitude, change_percent )  VALUES( " + 
+							std::to_string(stock.code) + ", '" + history.date +"', " + std::to_string(history.rank) + ", " +
+							std::to_string(history.price_start) + ", " + std::to_string(history.price_newst) + ", " + 
+							std::to_string(history.price_higest) + ", " + std::to_string(history.price_lowest) + ", " + 
+							std::to_string(history.turnover_rate) + ", " + std::to_string(history.turnover_sum) + ", " +
+							std::to_string(history.amplitude) + ", " + std::to_string(history.change_percent) + 
+						")"
+					;
+
+	auto rt = _mysqltool->_exec(sql);
+	if(rt)
+		simple_log.error("Update Stock History", std::to_string(stock.code), std::to_string(rt), "");	
+
+	return rt;
+}
+
+int stockpicker::SpiderStocksOverview::_updateStockInfo(const Stock& stock){
+	int rt = 0;
+
+	std::string sql = "SELECT stock_code FROM " + _mysqltool->Table_stocks_info + " WHERE stock_code = " + std::to_string(stock.code);  
+		
+	if(_mysqltool->dataAlreadyExists(sql)){
+		sql = "UPDATE " + _mysqltool->Table_stocks_info + " SET stock_name = '" + stock.name +
+												"', pe = " + std::to_string(stock.pe) +
+												",  market_value= " + std::to_string(stock.market_value) +
+												",  traded_market_value= " + std::to_string(stock.traded_market_value) +
+												" WHERE stock_code = " + std::to_string(stock.code)
+											;
+	}else{
+		sql = "INSERT INTO " + _mysqltool->Table_stocks_info + "(stock_code, stock_name, pe, market_value, traded_market_value) VALUES(" +	
+							std::to_string(stock.code) + ", '" + stock.name + "', " + std::to_string(stock.pe) + 
+							", " + std::to_string(stock.market_value) + 
+							", " + std::to_string(stock.traded_market_value) + 
+						")"
+					;
+	}
+
+	rt |= _mysqltool->_exec(sql);
+	if(rt)
+		simple_log.error("Update Stock Info", std::to_string(stock.code), std::to_string(rt), "");	
+
+	rt |= _updateStockHistory(stock);
+	rt |= _updateStockSectors(stock);
+
+	return rt;	
+}
+
+int stockpicker::SpiderStocksOverview::_storageStockTransactions(const std::string& tas, const std::string& date, const std::string stock_code){
+	std::string path = _filetool->_base_dir + "/" + date;
+
+	if( _filetool->_checkAndCreateDir(path) ){
+		if( _filetool->_writeToFile(path + "/" + stock_code, tas)){
+			return 0;	
+		}
+		simple_log.error("Write To File", stock_code, "Failed", "");
+	}
+	simple_log.error("Create Dir", stock_code, "Failed", "");
+	return -1;
+}

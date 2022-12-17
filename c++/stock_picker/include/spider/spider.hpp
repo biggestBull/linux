@@ -11,10 +11,10 @@
 #include<stdlib.h>
 #include<math.h>
 
-#include"stock.hpp"
-#include"mysqltool.hpp"
-#include"filetool.hpp"
-#include"log.hpp"
+#include"../public/stock.hpp"
+#include"../public/mysqltool.hpp"
+#include"../public/filetool.hpp"
+#include"../public/log.hpp"
 
 #define CURL_MAX_ERROR_BUF_LENGTH 1000
 
@@ -120,10 +120,16 @@ namespace stockpicker{
 		void _addSector(std::string sector);
 		void _addTransaction(std::string transaction);
 	
+		int _updateStockInfo(const Stock&);
+		int _updateStockHistory(const Stock&);
+		int _updateStockSectors(const Stock&);
+
+		int _storageStockTransactions(const std::string& tas, const std::string& date, const std::string stock_code);
+
 	public:
 		SpiderStocksOverview(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
 
-		int getAllStocks(std::string spec_stock = "");
+		int getAllStocks(std::string spec_stock = "", std::string spec_date = "");
 	};
 }
 

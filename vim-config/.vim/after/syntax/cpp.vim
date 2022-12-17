@@ -2893,6 +2893,7 @@ endif
 
 " TODO 我写的：start
 
+syn match	 ZHPunctuation /[，；。‘’“”？]/
 
 syn match	 FZOperator /=/
 syn match	 GXOperator	/[><]/ 
