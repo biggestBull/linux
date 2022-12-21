@@ -57,7 +57,7 @@ namespace stockpicker{
 		std::string curl_in;
 		char curl_error_buf[CURL_MAX_ERROR_BUF_LENGTH];
 
-		SimpleLog &simple_log = SimpleLog::getInstance();
+		yclib::SimpleLog &simple_log = yclib::SimpleLog::getInstance("spider");
 	
 		Spider(){
 			_curl = curl_easy_init();	

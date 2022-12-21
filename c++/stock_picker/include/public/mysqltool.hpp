@@ -26,7 +26,7 @@ namespace stockpicker{
 		MYSQL_RES* _query(const std::string&);
 
 	protected:
-		SimpleLog& simple_log = SimpleLog::getInstance();
+		yclib::SimpleLog& simple_log = yclib::SimpleLog::getInstance("spider");
 
 		std::string Table_stocks_info = "stocks_info";
 		std::string Table_sectors = "sectors";

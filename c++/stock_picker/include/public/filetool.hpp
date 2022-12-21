@@ -17,7 +17,7 @@ namespace stockpicker{
 		friend class SpiderStocksOverview;
 
 	protected:
-		SimpleLog& simple_log = SimpleLog::getInstance();
+		yclib::SimpleLog& simple_log = yclib::SimpleLog::getInstance("spider");
 
 	private:
 		std::string _base_dir;
