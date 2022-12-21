@@ -36,7 +36,7 @@ std::string findSpecContent(const char *before, const char *after, char *&in, in
 				if(!after[i]){ 
 					buf[buf_i - i] = '\0';
 
-					buf_i  =  0;
+					buf_i = 0;
 					i = 0;
 					state = HTMLState::BeforeFind;
 					return buf;
@@ -449,7 +449,10 @@ int stockpicker::SpiderStocksOverview::_updateStockInfo(const Stock& stock){
 		simple_log.error("Update Stock Info", std::to_string(stock.code), std::to_string(rt), "");	
 
 	rt |= _updateStockHistory(stock);
-	rt |= _updateStockSectors(stock);
+
+	if(stock.sectors.size()){
+		rt |= _updateStockSectors(stock);
+	}
 
 	return rt;	
 }

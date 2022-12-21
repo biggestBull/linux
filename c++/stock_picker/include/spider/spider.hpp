@@ -61,6 +61,10 @@ namespace stockpicker{
 	
 		Spider(){
 			_curl = curl_easy_init();	
+
+			curl_easy_setopt(_curl, CURLOPT_ERRORBUFFER, curl_error_buf);
+			curl_easy_setopt(_curl, CURLOPT_NOPROGRESS, 1L);
+			curl_easy_setopt(_curl, CURLOPT_VERBOSE, 0L);
 	
 			char tmp[12];
 			time_t t(time(NULL));
@@ -71,9 +75,6 @@ namespace stockpicker{
 	
 		~Spider(){
 			curl_easy_cleanup(_curl);
-			curl_easy_setopt(_curl, CURLOPT_ERRORBUFFER, curl_error_buf);
-			curl_easy_setopt(_curl, CURLOPT_NOPROGRESS, 1L);
-			curl_easy_setopt(_curl, CURLOPT_VERBOSE, 0L);
 		}
 		
 		int getWebContent(const char* url,uint (*_writeCb)(char* ,uint ,uint ,char*), void* out_data, int post_req = 0, struct curl_slist * headers  =  NULL, const char *data = ""){

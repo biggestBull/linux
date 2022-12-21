@@ -83,6 +83,9 @@ namespace yclib{
 			return tmp;
 		}
 
+		//FIXME 程序运行时，不要去手动修改日志文件，特别是删除内容，这使得两者的偏移变得不一致了, 这似乎会导致一个错误，使得写入不成功，导致后面不会有日志被记录了
+		//也有可能不是发生了错误，而是导致产生了一个文件空洞，使得后面的内容不可见了, 但观其大小，也不太像
+		//因此更像是前者，实际上，fstream在进行IO读写时默认是不会抛出异常的。
 		void _write(std::string level, std::string event, std::string who, std::string result, std::string reason, bool console){
 			std::string output_str(" [ " + _now() + " ] " + level + " <> " + event + " <> Mr. " + who + " <> [ " + result + " ] <> " + reason);
 

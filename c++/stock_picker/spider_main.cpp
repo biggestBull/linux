@@ -76,11 +76,15 @@ main(int argc,char *argv[]){
 			stockpicker::FileTool filetool("./stocks");
 			
 			auto spider = stockpicker::SpiderStocksOverview(&mysqltool, &filetool);  
-			if(code && date){
-				spider.getAllStocks(code, date);
-			}else{
-				spider.getAllStocks();
+
+			std::string _code, _date;
+			if(code){
+				_code = code;
 			}
+			if(date){
+				_date = date;
+			}
+			spider.getAllStocks(_code, _date);
 		}
 	}else{
 		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd [ --code _code ] [ --date _date ( for example: 2022-12-17 ) ]\n",argv[0]);
