@@ -1,4 +1,4 @@
 db.passwd
-logs/*.log
+logs/**/*.log
 stocks/*
 !stocks/.gitkeep
