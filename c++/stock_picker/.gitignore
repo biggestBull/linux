@@ -2,3 +2,4 @@ db.passwd
 logs/**/*.log
 stocks/*
 !stocks/.gitkeep
+nohup.out
