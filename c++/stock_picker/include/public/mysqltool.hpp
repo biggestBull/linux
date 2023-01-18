@@ -18,14 +18,12 @@
 namespace stockpicker{
 
 	class MySQLTool{
-		friend class SpiderStocksOverview;
-
 	private:
 		void _error(const std::string&);
 		int _exec(const std::string&);
 		MYSQL_RES* _query(const std::string&);
 
-	protected:
+	public:
 		yclib::SimpleLog& simple_log = yclib::SimpleLog::getInstance("spider");
 
 		std::string Table_stocks_info = "stocks_info";

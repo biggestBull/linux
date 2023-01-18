@@ -68,16 +68,20 @@ main(int argc,char *argv[]){
 			stockpicker::MySQLTool mysqltool(url,port,user,pwd);
 			stockpicker::FileTool filetool("./stocks");
 			
-			stockpicker::Strategy *strategy = new stockpicker::StrategyClassic(&mysqltool, &filetool);
+			stockpicker::StrategyFilter *strategy = new stockpicker::StrategyFilterByMarketValueRange(&mysqltool, &filetool);
 
 			//testing
 
 			std::vector<int> stockcodes;
-			stockcodes.push_back(1);
+			stockcodes.push_back(11);
 			stockcodes.push_back(2);
-			stockcodes.push_back(3);
+			stockcodes.push_back(4);
 
-			(*strategy)(stockcodes);
+			auto params = std::vector<std::string>();
+			params.push_back("1110000000");
+			params.push_back("6220000000");
+
+			(*strategy)(stockcodes, params);
 		}
 	}else{
 		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd --strategy_name\n",argv[0]);

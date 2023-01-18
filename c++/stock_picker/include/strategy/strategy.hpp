@@ -20,15 +20,16 @@ namespace stockpicker{
 		StrategiesLoader(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
 	};
 
-	class Strategy{
+	//过滤股票
+	class StrategyFilter{
 	public:
-		virtual bool checkStock(int stock_code) = 0;
+		virtual bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) = 0;
 
-		std::vector<int> operator()(std::vector<int> stockCodes){
+		std::vector<int> operator()(std::vector<int> stockCodes, std::vector<std::string> params = std::vector<std::string>()){
 			std::vector<int> remainStockCodes;
 		
 			for(auto curStock = stockCodes.begin(), endStock = stockCodes.end();curStock != endStock;curStock++){
-				if(this->checkStock(*curStock)){
+				if(this->checkStock(*curStock, params)){
 					remainStockCodes.push_back(*curStock);
 				}
 			}
@@ -37,16 +38,25 @@ namespace stockpicker{
 		}
 	};
 
-	class StrategyClassic: public Strategy{
+
+	// 具体策略 
+
+	class StrategyFilterByMarketValueRange: public StrategyFilter{
 	private:
 		MySQLTool *_mysqltool;
 		FileTool *_filetool;
 
 	public:
-		StrategyClassic(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
+		StrategyFilterByMarketValueRange(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
 		
-		bool checkStock(int stock_code) override{
-			std::cout<<stock_code<<std::endl;
+		//params: 0: minimum;1:maximum
+		bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
+			if(params.size() != 2) return false;
+
+			std::string sql = "SELECT market_value FROM `" + _mysqltool->Table_stocks_info + "` WHERE stock_code = " + std::to_string(stock_code) + " AND market_value BETWEEN " + params[0] + " AND " + params[1];
+			auto results = _mysqltool->query(sql);
+
+			if(results.size())	return true;
 			return false;
 		}
 	};
