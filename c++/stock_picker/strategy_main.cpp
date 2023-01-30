@@ -81,7 +81,13 @@ main(int argc,char *argv[]){
 			params.push_back("1110000000");
 			params.push_back("6220000000");
 
-			(*strategy)(stockcodes, params);
+			//(*strategy)(stockcodes, params);
+
+			strategy = new stockpicker::StrategyFilterByPriceTrendRecently(&mysqltool, &filetool);
+			params[0] = "20";
+			params[1] = "183";
+			auto results = (*strategy)(stockcodes, params);
+			std::cout<<results.size()<<std::endl;
 		}
 	}else{
 		printf("param error! correct format :\n\t%s --url _url --port _port --user _user --pwd _pwd --strategy_name\n",argv[0]);

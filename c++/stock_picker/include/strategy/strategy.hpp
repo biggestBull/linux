@@ -3,6 +3,7 @@
 
 #include<iostream>
 #include<vector>
+#include<cstdlib>
 
 #include"../public/stock.hpp"
 #include"../public/mysqltool.hpp"
@@ -41,6 +42,7 @@ namespace stockpicker{
 
 	// 具体策略 
 
+	//市值
 	class StrategyFilterByMarketValueRange: public StrategyFilter{
 	private:
 		MySQLTool *_mysqltool;
@@ -61,6 +63,35 @@ namespace stockpicker{
 		}
 	};
 		
+	//最近多少天的股价趋势
+	class StrategyFilterByPriceTrendRecently: public StrategyFilter{
+	private:
+		MySQLTool *_mysqltool;
+		FileTool *_filetool;
+
+	public:
+		StrategyFilterByPriceTrendRecently(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
+		
+		//params: 0: recently x days;1: minimum difference, can + -，need * 100
+		bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
+			if(params.size() != 2) return false;
+
+			std::string sql = "SELECT SUM(turnover_rate) as turnover_rate_total from ( " 
+									"SELECT turnover_rate FROM `" + _mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
+										std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[0] + 
+								") _ ";
+
+			auto results = _mysqltool->query(sql);
+
+			if(not results.size())	return false;
+		
+			auto a = std::atoi(params[1].c_str());
+			auto b = std::atoi(results[0][0].c_str());
+
+			//必须同号，且b大于等于a
+			return (a ^ b) >=  0 && std::abs(a) <= std::abs(b);
+		}
+	};
 }
 
 #endif
