@@ -76,8 +76,8 @@ namespace stockpicker{
 		bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
 			if(params.size() != 2) return false;
 
-			std::string sql = "SELECT SUM(turnover_rate) as turnover_rate_total from ( " 
-									"SELECT turnover_rate FROM `" + _mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
+			std::string sql = "SELECT SUM(change_percent) as change_percent_total from ( " 
+									"SELECT change_percent FROM `" + _mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
 										std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[0] + 
 								") _ ";
 
