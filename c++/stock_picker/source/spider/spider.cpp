@@ -386,7 +386,7 @@ int stockpicker::SpiderStocksOverview::_updateStockSectors(const Stock& stock){
 	int rt = 0;
 
 	std::string sql = "DELETE FROM " + _mysqltool->Table_stock_sector_related + " WHERE stock_code = " + std::to_string(stock.code);
-	if( rt = _mysqltool->_exec(sql) ) return rt;
+	if( rt = _mysqltool->exec(sql) ) return rt;
 
 	for(auto &sector:stock.sectors){
 		auto sector_id = _mysqltool->_getSectorId(sector);
@@ -395,7 +395,7 @@ int stockpicker::SpiderStocksOverview::_updateStockSectors(const Stock& stock){
 			continue;
 		}
 		sql = "INSERT INTO " + _mysqltool->Table_stock_sector_related + "(stock_code, sector_id) VALUES(" + std::to_string(stock.code) + ", " + std::to_string(sector_id) + ")";
-		rt  |= _mysqltool->_exec(sql);
+		rt  |= _mysqltool->exec(sql);
 	}
 
 	if(rt)
@@ -416,7 +416,7 @@ int stockpicker::SpiderStocksOverview::_updateStockHistory(const Stock& stock){
 						")"
 					;
 
-	auto rt = _mysqltool->_exec(sql);
+	auto rt = _mysqltool->exec(sql);
 	if(rt)
 		simple_log.error("Update Stock History", std::to_string(stock.code), std::to_string(rt), "");	
 
@@ -444,7 +444,7 @@ int stockpicker::SpiderStocksOverview::_updateStockInfo(const Stock& stock){
 					;
 	}
 
-	rt |= _mysqltool->_exec(sql);
+	rt |= _mysqltool->exec(sql);
 	if(rt)
 		simple_log.error("Update Stock Info", std::to_string(stock.code), std::to_string(rt), "");	
 

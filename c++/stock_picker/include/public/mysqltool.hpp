@@ -32,6 +32,7 @@ namespace stockpicker{
 		std::string Table_stocks_history = "stocks_history";
 
 		std::vector<std::vector<std::string>> query(const std::string&);
+		int exec(const std::string&);
 		bool dataAlreadyExists(const std::string&);
 
 	private:
@@ -64,6 +65,8 @@ namespace stockpicker{
 			return _all_sectors.size();
 		}
 
+		//声明成员函数为友元太麻烦了
+		friend class SpiderStocksOverview;
 		unsigned int _getSectorId(const std::string &sector){
 			if(_all_sectors.find(sector) != _all_sectors.end()){
 				return _all_sectors[sector];

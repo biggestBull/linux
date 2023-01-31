@@ -14,6 +14,10 @@ namespace stockpicker{
 		return 0;
 	}
 
+	int MySQLTool::exec(const std::string &sql){
+		return _exec(sql);
+	}
+
 	MYSQL_RES* MySQLTool::_query(const std::string &sql){
 		_exec(sql);
 
