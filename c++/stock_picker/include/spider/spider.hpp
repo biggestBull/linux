@@ -1,3 +1,6 @@
+
+#include"../public/mysqltool.hpp"
+
 #ifndef _STOCK_PICKER_SPIDER_H
 #define _STOCK_PICKER_SPIDER_H
 
@@ -12,7 +15,6 @@
 #include<math.h>
 
 #include"../public/stock.hpp"
-#include"../public/mysqltool.hpp"
 #include"../public/filetool.hpp"
 #include"../public/log.hpp"
 
@@ -96,6 +98,7 @@ namespace stockpicker{
 	};
 	
 	class SpiderStocksOverview:Spider{
+		friend class MySQLTool;
 	private:
 		MySQLTool *_mysqltool;	
 		FileTool *_filetool;

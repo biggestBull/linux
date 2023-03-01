@@ -16,6 +16,12 @@
 #include"log.hpp"
 
 namespace stockpicker{
+	class MySQLTool;
+}
+
+#include"../spider/spider.hpp"
+
+namespace stockpicker{
 
 	class MySQLTool{
 	private:
@@ -66,7 +72,7 @@ namespace stockpicker{
 		}
 
 		//声明成员函数为友元太麻烦了
-		friend class SpiderStocksOverview;
+		friend int stockpicker::SpiderStocksOverview::_updateStockSectors(const Stock&);
 		unsigned int _getSectorId(const std::string &sector){
 			if(_all_sectors.find(sector) != _all_sectors.end()){
 				return _all_sectors[sector];

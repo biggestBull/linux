@@ -23,14 +23,18 @@ namespace stockpicker{
 
 	//过滤股票
 	class StrategyFilter{
+	protected:
+		long long impossible_rank_value = 1L << (sizeof(long long) * 8 - 1);
+
 	public:
-		virtual bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) = 0;
+		virtual long long checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) = 0;
 
 		std::vector<int> operator()(std::vector<int> stockCodes, std::vector<std::string> params = std::vector<std::string>()){
 			std::vector<int> remainStockCodes;
 		
 			for(auto curStock = stockCodes.begin(), endStock = stockCodes.end();curStock != endStock;curStock++){
-				if(this->checkStock(*curStock, params)){
+				auto rank_value = this->checkStock(*curStock, params);
+				if(rank_value != impossible_rank_value){
 					remainStockCodes.push_back(*curStock);
 				}
 			}
@@ -52,14 +56,14 @@ namespace stockpicker{
 		StrategyFilterByMarketValueRange(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
 		
 		//params: 0: minimum;1:maximum
-		bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
-			if(params.size() != 2) return false;
+		long long checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
+			if(params.size() != 2) return impossible_rank_value;
 
 			std::string sql = "SELECT market_value FROM `" + _mysqltool->Table_stocks_info + "` WHERE stock_code = " + std::to_string(stock_code) + " AND market_value BETWEEN " + params[0] + " AND " + params[1];
 			auto results = _mysqltool->query(sql);
 
-			if(results.size())	return true;
-			return false;
+			if(results.size())	return std::atoll(results[0][0].c_str());
+			return impossible_rank_value;
 		}
 	};
 		
@@ -73,8 +77,8 @@ namespace stockpicker{
 		StrategyFilterByPriceTrendRecently(MySQLTool *mysqltool, FileTool *filetool):_mysqltool(mysqltool), _filetool(filetool){}
 		
 		//params: 0: recently x days;1: minimum difference, can + -，need * 100
-		bool checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
-			if(params.size() != 2) return false;
+		long long checkStock(int stock_code, std::vector<std::string> params = std::vector<std::string>()) override{
+			if(params.size() != 2) return impossible_rank_value;
 
 			std::string sql = "SELECT SUM(change_percent) as change_percent_total from ( " 
 									"SELECT change_percent FROM `" + _mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
@@ -83,13 +87,14 @@ namespace stockpicker{
 
 			auto results = _mysqltool->query(sql);
 
-			if(not results.size())	return false;
+			if(not results.size())	return impossible_rank_value;
 		
 			auto a = std::atoi(params[1].c_str());
 			auto b = std::atoi(results[0][0].c_str());
 
 			//必须同号，且b大于等于a
-			return (a ^ b) >=  0 && std::abs(a) <= std::abs(b);
+			if( (a ^ b) >= 0 && std::abs(a) <= std::abs(b) ) return static_cast<long long>( std::abs(b) - std::abs(a) );
+			return impossible_rank_value;
 		}
 	};
 }
