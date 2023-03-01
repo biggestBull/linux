@@ -18,8 +18,15 @@ STRATEGY_SOURCES := ./source/public/*.cpp
 strategy: strategy_main.cpp $(STRATEGY_SOURCES) $(STRATEGY_HEADS)
 	$(CXX) --std=c++11 strategy_main.cpp $(STRATEGY_SOURCES) $(STRATEGY_LIBS) -o strategy
 
+
+
+SERVER_LIBS := -lpthread   
+server: server_main.cpp 
+	$(CXX) --std=c++11 server_main.cpp $(SERVER_LIBS) -o server
+
 .PHONY:clean
 clean:
 	rm spider
 	rm strategy
+	rm server
 
