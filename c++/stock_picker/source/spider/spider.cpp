@@ -373,7 +373,9 @@ void stockpicker::SpiderStocksOverview::_addRank(std::string rank){
 	_stocks[_cur_stock_code].getHistoryAttr().setRank(std::stoi(rank));
 }
 
-void stockpicker::SpiderStocksOverview::_addSector(std::string sector){
+void stockpicker::SpiderStocksOverview::_addSector(std::string& sector){
+	sector.erase(0, sector.find_first_not_of('\"'));
+	sector.erase(sector.find_last_not_of('\"') + 1);
 	_stocks[_cur_stock_code].addSector(sector);
 }
 

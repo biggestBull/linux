@@ -1,5 +1,8 @@
 db.passwd
 logs/**/*.log
 stocks/*
+spider
+strategy
+server
 !stocks/.gitkeep
 nohup.out

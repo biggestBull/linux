@@ -20,9 +20,11 @@ strategy: strategy_main.cpp $(STRATEGY_SOURCES) $(STRATEGY_HEADS)
 
 
 
-SERVER_LIBS := -lpthread   
-server: server_main.cpp 
-	$(CXX) --std=c++11 server_main.cpp $(SERVER_LIBS) -o server
+SERVER_LIBS := -lmysqlclient -lpthread   
+SERVER_HEADS :=  ./third-parts/yhirose/cpp-httplib/httplib.h ./include/public/mysqltool.hpp
+SERVER_SOURCES := ./source/public/*.cpp 
+server: server_main.cpp $(SERVER_HEADS) $(SERVER_SOURCES) 
+	$(CXX) --std=c++11 server_main.cpp $(SERVER_SOURCES) $(SERVER_LIBS) -o server
 
 .PHONY:clean
 clean:

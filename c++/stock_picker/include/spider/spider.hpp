@@ -121,7 +121,7 @@ namespace stockpicker{
 	
 		void _addStock(std::map<std::string, std::string> &stock_attr);
 		void _addRank(std::string rank);
-		void _addSector(std::string sector);
+		void _addSector(std::string& sector);
 		void _addTransaction(std::string transaction);
 	
 		int _updateStockInfo(const Stock&);
