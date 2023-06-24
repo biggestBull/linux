@@ -121,6 +121,67 @@ namespace stockpicker{
 		}
 	};
 
+	//价格过滤
+	class StrategyFilterByPrice: public StrategyFilter{
+	public:
+		StrategyFilterByPrice(MySQLTool *mysqltool, FileTool *filetool):StrategyFilter(mysqltool, filetool){}
+		
+		//params: price_left, price_right
+		long long checkStock(int stock_code, std::vector<std::string>& params) override{
+			if(params.size() != 2) return impossible_rank_value;
+
+			printf("\r           \rcurrent stock: %d", stock_code);
+
+			std::string sql = "SELECT price_newst FROM `" + mysqltool->Table_stocks_history + "` WHERE stock_code = " + std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT 1 ";
+			auto results = mysqltool->query(sql);
+
+			if(results.size() && std::atoll(results[0][0].c_str())  >= std::atoll(params[0].c_str()) && std::atoll(results[0][0].c_str())  <= std::atoll(params[1].c_str())){	
+				return std::atoll(results[0][0].c_str());
+			}	
+			return impossible_rank_value;
+		}
+	};
+
+	//技术形态过滤 -----------------------------------------------------------------------------
+	//十字星-吊锤线-纺锤线-启明星等
+	class StrategyFilterByShapeOfDoji: public StrategyFilter{
+	public:
+		StrategyFilterByShapeOfDoji(MySQLTool *mysqltool, FileTool *filetool):StrategyFilter(mysqltool, filetool){}
+		
+		//params: 
+		//0：收盘与开盘之差的范围（千分比，可为负数, 如要求百分之一，则传入10, 要求百分之零点五，则传入5）left，1: &0-right，2：纳入统计的天数，3：偏移天数（往前便宜多少天），
+		//4；上影线长度（千分比, 不能为负数）left，5：&4-right，6：下影线长度（千分比，不能为负数）left，7：&6-right，8：满足该形态的个数要求
+		long long checkStock(int stock_code, std::vector<std::string>& params) override{
+			if(params.size() < 7) return impossible_rank_value;
+
+			printf("\r           \rcurrent stock: %d", stock_code);
+
+			std::string sql = "SELECT price_start, price_newst, price_higest, price_lowest FROM `" + mysqltool->Table_stocks_history + "` WHERE stock_code = " + std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[3] + ", " + params[2];
+			auto results = mysqltool->query(sql);
+
+			long long cnt = 0;
+			for(int i = 0;i < results.size(); i++){
+				int price_start = std::atoi(results[i][0].c_str());
+				int price_newst = std::atoi(results[i][1].c_str());
+				int price_higest = std::atoi(results[i][2].c_str());
+				int price_lowest = std::atoi(results[i][3].c_str());
+
+				if(
+					(price_newst - price_start) * 1000 / price_start >= std::atoi(params[0].c_str()) &&
+					(price_newst - price_start) * 1000 / price_start <= std::atoi(params[1].c_str()) &&
+					(price_higest - price_newst) * 1000 / price_start >= std::atoi(params[4].c_str()) &&	
+					(price_higest - price_newst) * 1000 / price_start <= std::atoi(params[5].c_str()) &&	
+					(price_newst - price_lowest) * 1000 / price_start >= std::atoi(params[6].c_str()) &&	
+					(price_newst - price_lowest) * 1000 / price_start <= std::atoi(params[7].c_str())	
+				){
+					cnt++;
+				}
+			}
+
+			return cnt >= std::atoll(params[8].c_str()) ? cnt : impossible_rank_value;
+		}
+	};
+
 	//策略加载器 -------------------------------------------------------------------------------
 	class StrategiesLoader{
 	private:
@@ -135,6 +196,8 @@ namespace stockpicker{
 			_strategies.insert({"MarketVauleRange", new StrategyFilterByMarketValueRange(mysqltool, filetool)}); 	
 			_strategies.insert({"PriceTrendRecently", new StrategyFilterByPriceTrendRecently(mysqltool, filetool)}); 	
 			_strategies.insert({"Sectors", new StrategyFilterBySectors(mysqltool, filetool)}); 	
+			_strategies.insert({"Price", new StrategyFilterByPrice(mysqltool, filetool)}); 	
+			_strategies.insert({"ShapeOfDoji", new StrategyFilterByShapeOfDoji(mysqltool, filetool)}); 	
 		}
 
 
@@ -155,7 +218,7 @@ namespace stockpicker{
 			 if(_strategies.find(strategy)  != _strategies.end()){
 				 _stock_codes = (*_strategies[strategy])(_stock_codes, params);
 
-				 std::cout<<"\r               \r"<<strategy<<" : "<<_stock_codes.size()<<std::endl<<std::endl;
+				 std::cout<<"\r                                         \r"<<strategy<<" : "<<_stock_codes.size()<<std::endl<<std::endl;
 			 }
 
 			return *this;
