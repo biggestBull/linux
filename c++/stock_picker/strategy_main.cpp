@@ -2,13 +2,14 @@
 #include<unistd.h>
 #include<getopt.h>
 #include<string>
+#include<utility>
 
 #include"include/public/mysqltool.hpp"
 #include"include/strategy/strategy.hpp"
 #include"include/public/stock.hpp"
 #include"include/public/stock_viewer.hpp"
 
-std::map<std::string, std::vector<std::string>>
+std::vector<std::pair<std::string, std::vector<std::string>>>
 parse_strategies_data(std::string strategiesData){
 /*
  * &[STRATEGY_NAME_1]:PARAM_1:PARAM_2:...&
@@ -29,22 +30,20 @@ parse_strategies_data(std::string strategiesData){
 
 	std::string paramName;
 
-	std::map<std::string, std::vector<std::string>> params;
+	//std::map<std::string, std::vector<std::string>> params;
+	std::vector<std::pair<std::string, std::vector<std::string>>> params;
+	uint cur_params_index = -1;
 
 	for(uint i = 0;i < strategiesData.size();i++){
 		if(strategiesData[i] == '&'){
 			if(state == StrategiesDataState::ItemEnd){
 				state = StrategiesDataState::ItemStart;
 				startIndex = i+1;
-			}
-
-			if(state == StrategiesDataState::StrategyNameEnd || state == StrategiesDataState::ParamGap){
+			}else {
 				if(state == StrategiesDataState::ParamGap){
 					if(startIndex < i && paramName.size()){
-						params[paramName].emplace_back(strategiesData.substr(startIndex, i - startIndex));
+						params[cur_params_index].second.emplace_back(strategiesData.substr(startIndex, i - startIndex));
 					}
-				}else{
-					params[paramName] = std::vector<std::string>();
 				}
 
 				paramName.clear();
@@ -57,10 +56,14 @@ parse_strategies_data(std::string strategiesData){
 			if(startIndex < i){
 				paramName = strategiesData.substr(startIndex, i - startIndex);
 			}
+
+			params.emplace_back(paramName, std::vector<std::string>());
+			cur_params_index++;
+
 			state = StrategiesDataState::StrategyNameEnd;
 		}else if(strategiesData[i] == ':' && (state == StrategiesDataState::StrategyNameEnd || state == StrategiesDataState::ParamGap)){ 
 			if(state == StrategiesDataState::ParamGap && startIndex < i && paramName.size()){
-				params[paramName].emplace_back(strategiesData.substr(startIndex, i - startIndex));
+				params[cur_params_index].second.emplace_back(strategiesData.substr(startIndex, i - startIndex));
 			}
 			state = StrategiesDataState::ParamGap;
 			startIndex = i+1;

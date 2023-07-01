@@ -53,7 +53,7 @@ namespace stockpicker{
 
 			printf("\r           \rcurrent stock: %d", stock_code);
 
-			std::string sql = "SELECT market_value FROM `" + mysqltool->Table_stocks_info + "` WHERE stock_code = " + std::to_string(stock_code) + " AND market_value BETWEEN " + params[0] + " AND " + params[1];
+			std::string sql = "SELECT traded_market_value FROM `" + mysqltool->Table_stocks_info + "` WHERE stock_code = " + std::to_string(stock_code) + " AND traded_market_value BETWEEN " + params[0] + " AND " + params[1];
 			auto results = mysqltool->query(sql);
 
 			if(results.size())	return std::atoll(results[0][0].c_str());
@@ -193,7 +193,7 @@ namespace stockpicker{
 		std::vector<int> _stock_codes;
 
 		void _constructStrategies(){
-			_strategies.insert({"MarketVauleRange", new StrategyFilterByMarketValueRange(mysqltool, filetool)}); 	
+			_strategies.insert({"MarketValueRange", new StrategyFilterByMarketValueRange(mysqltool, filetool)}); 	
 			_strategies.insert({"PriceTrendRecently", new StrategyFilterByPriceTrendRecently(mysqltool, filetool)}); 	
 			_strategies.insert({"Sectors", new StrategyFilterBySectors(mysqltool, filetool)}); 	
 			_strategies.insert({"Price", new StrategyFilterByPrice(mysqltool, filetool)}); 	
@@ -219,6 +219,8 @@ namespace stockpicker{
 				 _stock_codes = (*_strategies[strategy])(_stock_codes, params);
 
 				 std::cout<<"\r                                         \r"<<strategy<<" : "<<_stock_codes.size()<<std::endl<<std::endl;
+			 }else{
+				std::cout << "无效的策略名!" << std::endl;
 			 }
 
 			return *this;
