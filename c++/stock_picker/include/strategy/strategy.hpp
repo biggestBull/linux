@@ -66,22 +66,22 @@ namespace stockpicker{
 	public:
 		StrategyFilterByPriceTrendRecently(MySQLTool *mysqltool, FileTool *filetool):StrategyFilter(mysqltool, filetool){}
 		
-		//params: 0: recently x days;1: minimum difference, can + -，need * 100
+		//params: 0:before x days;1: selected x days;2: minimum difference, can + -，need * 100
 		long long checkStock(int stock_code, std::vector<std::string>& params) override{
-			if(params.size() != 2) return impossible_rank_value;
+			if(params.size() < 3) return impossible_rank_value;
 
 			printf("\r           \rcurrent stock: %d", stock_code);
 
 			std::string sql = "SELECT SUM(change_percent) as change_percent_total from ( " 
 									"SELECT change_percent FROM `" + mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
-										std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[0] + 
+										std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[0] + ", " + params[1] + 
 								") _ ";
 
 			auto results = mysqltool->query(sql);
 
 			if(not results.size())	return impossible_rank_value;
 		
-			auto a = std::atoi(params[1].c_str());
+			auto a = std::atoi(params[2].c_str());
 			auto b = std::atoi(results[0][0].c_str());
 
 			//必须同号，且b大于等于a
