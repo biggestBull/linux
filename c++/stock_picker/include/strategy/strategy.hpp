@@ -90,6 +90,61 @@ namespace stockpicker{
 		}
 	};
 
+	//最近多少天的换手率
+	class StrategyFilterByTurnoverRateRecently: public StrategyFilter{
+	public:
+		StrategyFilterByTurnoverRateRecently(MySQLTool *mysqltool, FileTool *filetool):StrategyFilter(mysqltool, filetool){}
+		
+		//params: 0:before x days;1: selected x days;2: minimum difference,need * 100
+		long long checkStock(int stock_code, std::vector<std::string>& params) override{
+			if(params.size() < 3) return impossible_rank_value;
+
+			printf("\r           \rcurrent stock: %d", stock_code);
+
+			std::string sql = "SELECT SUM(turnover_rate) as turnover_rate_total from ( " 
+									"SELECT turnover_rate FROM `" + mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
+										std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[0] + ", " + params[1] + 
+								") _ ";
+
+			auto results = mysqltool->query(sql);
+
+			if(not results.size())	return impossible_rank_value;
+		
+			auto a = std::atoi(params[2].c_str());
+			auto b = std::atoi(results[0][0].c_str());
+
+			//必须同号，且b大于等于a
+			if( (a ^ b) >= 0 && std::abs(a) <= std::abs(b) ) return static_cast<long long>( std::abs(b) - std::abs(a) );
+			return impossible_rank_value;
+		}
+	};
+
+	//最近多少天的排名上升
+	class StrategyFilterByRankRecently: public StrategyFilter{
+	public:
+		StrategyFilterByRankRecently(MySQLTool *mysqltool, FileTool *filetool):StrategyFilter(mysqltool, filetool){}
+		
+		//params: 0: selected x days, minimum:2;1: end(day) exceed start(day) 
+		long long checkStock(int stock_code, std::vector<std::string>& params) override{
+			if(params.size() < 2) return impossible_rank_value;
+
+			printf("\r           \rcurrent stock: %d", stock_code);
+
+			std::string sql = "SELECT rank FROM `" + mysqltool->Table_stocks_history + "` WHERE stock_code = " + 
+										std::to_string(stock_code) + " ORDER BY created_date DESC LIMIT " + params[0];
+
+			auto results = mysqltool->query(sql);
+
+			if(not results.size() or results.size() < 2) return impossible_rank_value;
+		
+			auto a = std::atoi(results[results.size() - 1][0].c_str());
+			auto b = std::atoi(results[0][0].c_str());
+
+			if( a - b >= std::atoi( params[1].c_str() ) ) return static_cast<long long>( a - b );
+			return impossible_rank_value;
+		}
+	};
+
 	//板块过滤
 	class StrategyFilterBySectors: public StrategyFilter{
 	public:
@@ -195,6 +250,8 @@ namespace stockpicker{
 		void _constructStrategies(){
 			_strategies.insert({"MarketValueRange", new StrategyFilterByMarketValueRange(mysqltool, filetool)}); 	
 			_strategies.insert({"PriceTrendRecently", new StrategyFilterByPriceTrendRecently(mysqltool, filetool)}); 	
+			_strategies.insert({"TurnoverRate", new StrategyFilterByTurnoverRateRecently(mysqltool, filetool)}); 	
+			_strategies.insert({"Rank", new StrategyFilterByRankRecently(mysqltool, filetool)}); 	
 			_strategies.insert({"Sectors", new StrategyFilterBySectors(mysqltool, filetool)}); 	
 			_strategies.insert({"Price", new StrategyFilterByPrice(mysqltool, filetool)}); 	
 			_strategies.insert({"ShapeOfDoji", new StrategyFilterByShapeOfDoji(mysqltool, filetool)}); 	
